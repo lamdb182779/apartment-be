@@ -1,7 +1,7 @@
 
 import { Accountant } from 'src/accountants/entities/accountant.entity';
 import { Apartment } from 'src/apartments/entities/apartment.entity';
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
 export class Bill {
@@ -23,9 +23,15 @@ export class Bill {
     @Column({ default: false })
     isPaid: boolean;
 
-    @ManyToOne(() => Accountant, accountant => accountant.bills)
+    @ManyToOne(() => Accountant, accountant => accountant.bills, { nullable: true })
     accountant: Accountant
 
     @ManyToOne(() => Apartment, apartment => apartment.bills)
     apartment: Apartment
+
+    @CreateDateColumn()
+    createdAt: Date
+
+    @UpdateDateColumn()
+    updatedAt: Date
 }

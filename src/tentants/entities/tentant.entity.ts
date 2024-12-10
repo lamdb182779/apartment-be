@@ -1,6 +1,5 @@
-import { Account } from 'src/accounts/entities/account.entity';
 import { Apartment } from 'src/apartments/entities/apartment.entity';
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, BeforeUpdate } from 'typeorm';
 
 @Entity()
 export class Tentant {
@@ -13,14 +12,47 @@ export class Tentant {
     @Column({ default: true })
     active: boolean;
 
+    @Column({ default: 32, update: false })
+    role: number;
+
     @Column({ nullable: true })
     image: string;
 
-    @OneToOne(() => Apartment, apartment => apartment.tentant)
+    @Column({ unique: true })
+    email: string;
+
+    @Column({ nullable: true, unique: true })
+    phone: string;
+
+    @Column({ unique: true })
+    username: string;
+
+    @Column({ select: false })
+    password: string;
+
+    @Column({ default: false })
+    isVerify: boolean;
+
+    @Column({ nullable: true })
+    verifyId: string;
+
+    @Column({ nullable: true })
+    expiredAt: Date;
+
+    @ManyToOne(() => Apartment, apartment => apartment.tentants, { nullable: true })
     @JoinColumn()
     apartment: Apartment
 
-    @OneToOne(() => Account, account => account.tentant)
-    @JoinColumn()
-    account: Account
+    @CreateDateColumn()
+    createdAt: Date
+
+    @UpdateDateColumn()
+    updatedAt: Date
+
+    @BeforeUpdate()
+    async checkActiveStatus() {
+        if (this.active === false) {
+            this.apartment = null
+        }
+    }
 }

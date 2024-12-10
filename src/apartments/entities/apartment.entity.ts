@@ -1,8 +1,11 @@
 import { Bill } from 'src/bills/entities/bill.entity';
 import { Owner } from 'src/owners/entities/owner.entity';
 import { Parameter } from 'src/parameters/entities/parameter.entity';
+import { Room } from 'src/rooms/entities/room.entity';
+import { Service } from 'src/services/entities/service.entity';
 import { Tentant } from 'src/tentants/entities/tentant.entity';
-import { Entity, Column, PrimaryColumn, OneToMany, ManyToOne, OneToOne } from 'typeorm';
+import { Visitor } from 'src/visitors/entities/visitor.entity';
+import { Entity, Column, PrimaryColumn, OneToMany, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
 export class Apartment {
@@ -15,18 +18,34 @@ export class Apartment {
     @Column()
     axis: number;
 
-    @Column()
+    @Column("decimal")
     acreage: number;
 
     @ManyToOne(() => Owner, owner => owner.apartments, { nullable: true })
     owner: Owner
 
-    @OneToMany(() => Parameter, parameter => parameter.apartment)
+    @OneToMany(() => Parameter, parameter => parameter.apartment, { onDelete: "CASCADE" })
     parameters: Parameter[]
 
-    @OneToOne(() => Tentant, tentant => tentant.apartment, { nullable: true })
-    tentant: Tentant
+    @OneToMany(() => Tentant, tentant => tentant.apartment, { onDelete: "SET NULL" })
+    tentants: Tentant[]
 
-    @OneToMany(() => Bill, bill => bill.apartment)
+    @OneToMany(() => Visitor, visitor => visitor.apartment, { onDelete: "SET NULL" })
+    visitors: Visitor[]
+
+    @OneToMany(() => Service, service => service.apartment, { onDelete: "SET NULL" })
+    services: Service[]
+
+    @OneToMany(() => Bill, bill => bill.apartment, { onDelete: "CASCADE" })
     bills: Bill[]
+
+    @OneToMany(() => Room, room => room.apartment, { onDelete: "CASCADE" })
+    rooms: Room[]
+
+    @CreateDateColumn()
+    createdAt: Date
+
+    @UpdateDateColumn()
+    updatedAt: Date
+
 }

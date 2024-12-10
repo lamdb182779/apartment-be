@@ -1,5 +1,6 @@
 import { Apartment } from 'src/apartments/entities/apartment.entity';
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
+import { Technician } from 'src/technicians/entities/technician.entity';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
 export class Parameter {
@@ -12,9 +13,18 @@ export class Parameter {
     @Column()
     type: string;
 
-    @Column()
+    @Column({ nullable: true })
     value: number;
 
     @ManyToOne(() => Apartment, apartment => apartment.parameters)
     apartment: Apartment
+
+    @ManyToOne(() => Technician, technician => technician.parameters, { nullable: true })
+    technician: Technician
+
+    @CreateDateColumn()
+    createdAt: Date
+
+    @UpdateDateColumn()
+    updatedAt: Date
 }

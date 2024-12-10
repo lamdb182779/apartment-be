@@ -1,11 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { TentantsService } from './tentants.service';
 import { CreateTentantDto } from './dto/create-tentant.dto';
 import { UpdateTentantDto } from './dto/update-tentant.dto';
 
 @Controller('tentants')
 export class TentantsController {
-  constructor(private readonly tentantsService: TentantsService) {}
+  constructor(private readonly tentantsService: TentantsService) { }
 
   @Post()
   create(@Body() createTentantDto: CreateTentantDto) {
@@ -13,22 +13,23 @@ export class TentantsController {
   }
 
   @Get()
-  findAll() {
-    return this.tentantsService.findAll();
+  findAll(@Query() query: Record<string, string>) {
+    const { current, pageSize, orderBy, ...filter } = query
+    return this.tentantsService.findAll(filter, +current, +pageSize, orderBy);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.tentantsService.findOne(+id);
+    return this.tentantsService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateTentantDto: UpdateTentantDto) {
-    return this.tentantsService.update(+id, updateTentantDto);
+    return this.tentantsService.update(id, updateTentantDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.tentantsService.remove(+id);
+    return this.tentantsService.remove(id);
   }
 }

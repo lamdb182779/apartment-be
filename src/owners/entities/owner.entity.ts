@@ -1,6 +1,5 @@
-import { Account } from 'src/accounts/entities/account.entity';
 import { Apartment } from 'src/apartments/entities/apartment.entity';
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
 export class Owner {
@@ -13,13 +12,39 @@ export class Owner {
     @Column({ default: true })
     active: boolean;
 
+    @Column({ default: 31, update: false })
+    role: number;
+
     @Column({ nullable: true })
     image: string;
 
-    @OneToMany(() => Apartment, apartment => apartment.owner)
+    @Column({ unique: true })
+    email: string;
+
+    @Column({ nullable: true, unique: true })
+    phone: string;
+
+    @Column({ unique: true })
+    username: string;
+
+    @Column({ select: false })
+    password: string;
+
+    @Column({ default: false })
+    isVerify: boolean;
+
+    @Column({ nullable: true })
+    verifyId: string;
+
+    @Column({ nullable: true })
+    expiredAt: Date;
+
+    @OneToMany(() => Apartment, apartment => apartment.owner, { onDelete: "SET NULL" })
     apartments: Apartment[]
 
-    @OneToOne(() => Account, account => account.owner)
-    @JoinColumn()
-    account: Account
+    @CreateDateColumn()
+    createdAt: Date
+
+    @UpdateDateColumn()
+    updatedAt: Date
 }

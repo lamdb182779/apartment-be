@@ -12,15 +12,15 @@ export class BillsService {
     return `This action returns all bills`;
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return `This action returns a #${id} bill`;
   }
 
-  update(id: number, updateBillDto: UpdateBillDto) {
+  update(id: string, updateBillDto: UpdateBillDto) {
     return `This action updates a #${id} bill`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} bill`;
   }
 }

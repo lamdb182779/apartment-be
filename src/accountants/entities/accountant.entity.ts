@@ -1,6 +1,5 @@
-import { Account } from 'src/accounts/entities/account.entity';
 import { Bill } from 'src/bills/entities/bill.entity';
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
 export class Accountant {
@@ -13,14 +12,31 @@ export class Accountant {
     @Column({ default: true })
     active: boolean;
 
+    @Column({ default: 22, update: false })
+    role: number;
+
     @Column({ nullable: true })
     image: string;
 
-    @OneToMany(() => Bill, bill => bill.accountant)
+    @Column({ unique: true })
+    email: string;
+
+    @Column({ nullable: true, unique: true })
+    phone: string;
+
+    @Column({ unique: true })
+    username: string;
+
+    @Column({ select: false })
+    password: string;
+
+    @OneToMany(() => Bill, bill => bill.accountant, { onDelete: "SET NULL" })
     bills: Bill[]
 
-    @OneToOne(() => Account, account => account.accountant)
-    @JoinColumn()
-    account: Account
+    @CreateDateColumn()
+    createdAt: Date
+
+    @UpdateDateColumn()
+    updatedAt: Date
 }
 
