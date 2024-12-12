@@ -152,7 +152,9 @@ export class AuthService {
     async login(user: any) {
         const payload = { role: user.role, id: user.id };
         return {
-            message: "Đăng nhập thành công",
+            image: user.image,
+            name: user.name,
+            id: user.id,
             access_token: this.jwtService.sign(payload),
         }
     }
@@ -164,7 +166,7 @@ export class AuthService {
             case "owner": {
                 const owner = await this.ownersRepository.findOne({
                     where: {
-                        id: id,
+                        username: id,
                         active: true
                     },
                     select: ['id', 'email', "name", "active", "isVerify", "expiredAt", "verifyId"],
@@ -177,7 +179,7 @@ export class AuthService {
                     }
                 }
                 const verifyId = generateSecureOtp()
-                const update = await this.ownersRepository.update(id, {
+                const update = await this.ownersRepository.update(owner.id, {
                     expiredAt: add(new Date(), { minutes: 5 }),
                     verifyId
                 })
@@ -203,7 +205,7 @@ export class AuthService {
             case "tentant": {
                 const tentant = await this.tentantsRepository.findOne({
                     where: {
-                        id: id,
+                        username: id,
                         active: true
                     },
                     select: ['id', 'email', "name", "active", "isVerify", "expiredAt", "verifyId"],
@@ -216,7 +218,7 @@ export class AuthService {
                     }
                 }
                 const verifyId = generateSecureOtp()
-                const update = await this.tentantsRepository.update(id, {
+                const update = await this.tentantsRepository.update(tentant.id, {
                     expiredAt: add(new Date(), { minutes: 5 }),
                     verifyId
                 })
@@ -250,7 +252,7 @@ export class AuthService {
             case "owner": {
                 const owner = await this.ownersRepository.findOne({
                     where: {
-                        id: id,
+                        username: id,
                         active: true
                     },
                     select: ['id', 'email', 'password', "active", "image", "name", "phone", "role", "isVerify", "expiredAt", "verifyId"],
@@ -260,7 +262,7 @@ export class AuthService {
                 if (otp !== owner.verifyId) throw new BadRequestException("Mã xác thực không chính xác!")
                 if (owner.expiredAt === null || isBefore(owner.expiredAt, new Date())) throw new BadRequestException("Mã xác thực đã hết hạn!")
 
-                const update = await this.ownersRepository.update(id, { isVerify: true })
+                const update = await this.ownersRepository.update(owner.id, { isVerify: true })
                 if (update.affected === 0) throw new BadRequestException("Lỗi khi cập nhật xác thực!")
                 return {
                     message: "Xác thực thành công, vui lòng đăng nhập lại",
@@ -269,7 +271,7 @@ export class AuthService {
             case "tentant": {
                 const tentant = await this.tentantsRepository.findOne({
                     where: {
-                        id: id,
+                        username: id,
                         active: true
                     },
                     select: ['id', 'email', 'password', "active", "image", "name", "phone", "role", "apartment", "isVerify", "expiredAt", "verifyId"],
@@ -279,7 +281,7 @@ export class AuthService {
                 if (otp !== tentant.verifyId) throw new BadRequestException("Mã xác thực không chính xác!")
                 if (tentant.expiredAt === null || isBefore(tentant.expiredAt, new Date())) throw new BadRequestException("Mã xác thực đã hết hạn!")
 
-                const update = await this.tentantsRepository.update(id, { isVerify: true })
+                const update = await this.tentantsRepository.update(tentant.id, { isVerify: true })
                 if (update.affected === 0) throw new BadRequestException("Lỗi khi cập nhật xác thực!")
                 return {
                     message: "Xác thực thành công, vui lòng đăng nhập lại",
