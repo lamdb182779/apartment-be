@@ -19,20 +19,20 @@ export class AuthController {
     }
 
     @Public()
-    @Patch("/send")
+    @Patch("send")
     async getVerifyEmail(@Body() body: { id: string, role: string }) {
         const { id, role } = body
         return this.authService.sendVerifyEmail(id, +role)
     }
 
     @Public()
-    @Patch("/verify")
+    @Patch("verify")
     async verifyEmail(@Body() body: { id: string, role: string, otp: string }) {
         const { id, role, otp } = body
         return this.authService.verifyEmail(id, +role, otp)
     }
 
-    @Patch("/change")
+    @Patch("change")
     async changePassword(@Body() body: { id: string, role: string, newPassword: string, currentPassword: string }) {
         const { id, role, newPassword, currentPassword } = body
         return this.authService.changePassword(id, +role, newPassword, currentPassword)

@@ -5,7 +5,7 @@ import { Room } from 'src/rooms/entities/room.entity';
 import { Service } from 'src/services/entities/service.entity';
 import { Tentant } from 'src/tentants/entities/tentant.entity';
 import { Visitor } from 'src/visitors/entities/visitor.entity';
-import { Entity, Column, PrimaryColumn, OneToMany, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryColumn, OneToMany, ManyToOne, CreateDateColumn, UpdateDateColumn, BeforeUpdate } from 'typeorm';
 
 @Entity()
 export class Apartment {
@@ -20,6 +20,21 @@ export class Apartment {
 
     @Column("decimal")
     acreage: number;
+
+    @Column("decimal", { nullable: true })
+    rentPrice: number;
+
+    @Column({ default: false })
+    maintaining: boolean;
+
+    @Column({ default: true })
+    hasBalcony: boolean;
+
+    @Column({ nullable: true })
+    lastMaintain: Date;
+
+    @Column("decimal", { default: 0 })
+    debt: number
 
     @ManyToOne(() => Owner, owner => owner.apartments, { nullable: true })
     owner: Owner
@@ -47,5 +62,4 @@ export class Apartment {
 
     @UpdateDateColumn()
     updatedAt: Date
-
 }

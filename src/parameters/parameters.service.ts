@@ -2,9 +2,9 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { UpdateParameterDto } from './dto/update-parameter.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Parameter } from './entities/parameter.entity';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { Apartment } from 'src/apartments/entities/apartment.entity';
-import { format, isBefore, setDate, startOfMonth, subMonths } from 'date-fns';
+import { format, isBefore, setDate, startOfMonth, subDays, subMonths } from 'date-fns';
 
 @Injectable()
 export class ParametersService {

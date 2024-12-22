@@ -1,5 +1,6 @@
 import { Apartment } from 'src/apartments/entities/apartment.entity';
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, BeforeUpdate } from 'typeorm';
+import { Vehicle } from 'src/vehicles/entities/vehicle.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, BeforeUpdate, OneToMany } from 'typeorm';
 
 @Entity()
 export class Tentant {
@@ -42,6 +43,9 @@ export class Tentant {
     @ManyToOne(() => Apartment, apartment => apartment.tentants, { nullable: true })
     @JoinColumn()
     apartment: Apartment
+
+    @OneToMany(() => Vehicle, vehicle => vehicle.tentant, { onDelete: "CASCADE" })
+    vehicles: Vehicle[]
 
     @CreateDateColumn()
     createdAt: Date

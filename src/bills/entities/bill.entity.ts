@@ -1,7 +1,7 @@
 
 import { Accountant } from 'src/accountants/entities/accountant.entity';
 import { Apartment } from 'src/apartments/entities/apartment.entity';
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
 export class Bill {
@@ -17,11 +17,14 @@ export class Bill {
     @Column("decimal")
     amount: number;
 
-    @Column()
-    expired: Date;
+    @Column({ default: "Dịch vụ khác" })
+    type: string;
 
     @Column({ default: false })
     isPaid: boolean;
+
+    @Column()
+    expired: Date;
 
     @ManyToOne(() => Accountant, accountant => accountant.bills, { nullable: true })
     accountant: Accountant

@@ -73,7 +73,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
           id,
           active: true
         })
-        if (!tentant) throw new UnauthorizedException("Không tìm thấy người thuê đang hoạt động với tài khoản này, vui lòng kiểm tra lại!")
+        if (!tentant) throw new UnauthorizedException("Không tìm thấy cư dân đang hoạt động với tài khoản này, vui lòng kiểm tra lại!")
         return tentant
       }
       case "receptionist": {

@@ -23,6 +23,8 @@ import { ReceptionistsModule } from './receptionists/receptionists.module';
 import { DirectorsModule } from './directors/directors.module';
 import { RegentsModule } from './regents/regents.module';
 import { RoomsModule } from './rooms/rooms.module';
+import { VehiclesModule } from './vehicles/vehicles.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -95,6 +97,8 @@ import { RoomsModule } from './rooms/rooms.module';
       })
     }),
     RoomsModule,
+    VehiclesModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [

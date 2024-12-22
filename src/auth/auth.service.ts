@@ -83,7 +83,7 @@ export class AuthService {
                     },
                     select: ['id', 'username', 'email', 'password', "active", "image", "name", "phone", "role", "apartment", "isVerify"],
                 })
-                if (!tentant) throw new UnauthorizedException("Không tìm thấy người thuê đang hoạt động với tài khoản này, vui lòng kiểm tra lại!")
+                if (!tentant) throw new UnauthorizedException("Không tìm thấy cư dân đang hoạt động với tài khoản này, vui lòng kiểm tra lại!")
                 const compare = await comparePassword(plainPassword, tentant.password)
                 if (!compare) throw new UnauthorizedException("Sai mật khẩu, vui lòng kiểm tra lại!")
                 const { password, ...result } = tentant
@@ -155,6 +155,7 @@ export class AuthService {
             image: user.image,
             name: user.name,
             id: user.id,
+            role: user.role,
             access_token: this.jwtService.sign(payload),
         }
     }
@@ -210,7 +211,7 @@ export class AuthService {
                     },
                     select: ['id', 'email', "name", "active", "isVerify", "expiredAt", "verifyId"],
                 })
-                if (!tentant) throw new BadRequestException("Không tìm thấy người thuê đang hoạt động với mã số này, vui lòng kiểm tra lại!")
+                if (!tentant) throw new BadRequestException("Không tìm thấy cư dân đang hoạt động với mã số này, vui lòng kiểm tra lại!")
                 if (tentant.isVerify) throw new BadRequestException("Tài khoản này đã được xác thực email!")
                 if (tentant.expiredAt && isAfter(tentant.expiredAt, add(new Date(), { minutes: 3 }))) {
                     return {
@@ -276,7 +277,7 @@ export class AuthService {
                     },
                     select: ['id', 'email', 'password', "active", "image", "name", "phone", "role", "apartment", "isVerify", "expiredAt", "verifyId"],
                 })
-                if (!tentant) throw new BadRequestException("Không tìm thấy người thuê đang hoạt động với mã số này, vui lòng kiểm tra lại!")
+                if (!tentant) throw new BadRequestException("Không tìm thấy cư dân đang hoạt động với mã số này, vui lòng kiểm tra lại!")
                 if (tentant.isVerify) throw new BadRequestException("Tài khoản này đã được xác thực email!")
                 if (otp !== tentant.verifyId) throw new BadRequestException("Mã xác thực không chính xác!")
                 if (tentant.expiredAt === null || isBefore(tentant.expiredAt, new Date())) throw new BadRequestException("Mã xác thực đã hết hạn!")
@@ -321,11 +322,101 @@ export class AuthService {
                     },
                     select: ['password'],
                 })
-                if (!tentant) throw new BadRequestException("Không tìm thấy người thuê đang hoạt động với mã số này, vui lòng kiểm tra lại!")
+                if (!tentant) throw new BadRequestException("Không tìm thấy cư dân đang hoạt động với mã số này, vui lòng kiểm tra lại!")
                 const compare = await comparePassword(currentPassword, tentant.password)
                 if (!compare) throw new UnauthorizedException("Sai mật khẩu, vui lòng kiểm tra lại!")
                 const hash = await hashPassword(newPassword)
                 const update = await this.tentantsRepository.update(id, { password: hash })
+                if (update.affected === 0) throw new BadRequestException("Lỗi khi cập nhật mật khẩu!")
+                return {
+                    message: "Đổi mật khẩu thành công",
+                }
+            }
+            case "accountant": {
+                const accountant = await this.accountantsRepository.findOne({
+                    where: {
+                        id: id,
+                        active: true
+                    },
+                    select: ['password'],
+                })
+                if (!accountant) throw new BadRequestException("Không tìm thấy kế toán đang hoạt động với mã số này, vui lòng kiểm tra lại!")
+                const compare = await comparePassword(currentPassword, accountant.password)
+                if (!compare) throw new UnauthorizedException("Sai mật khẩu, vui lòng kiểm tra lại!")
+                const hash = await hashPassword(newPassword)
+                const update = await this.accountantsRepository.update(id, { password: hash })
+                if (update.affected === 0) throw new BadRequestException("Lỗi khi cập nhật mật khẩu!")
+                return {
+                    message: "Đổi mật khẩu thành công",
+                }
+            }
+            case "technician": {
+                const technician = await this.techniciansRepository.findOne({
+                    where: {
+                        id: id,
+                        active: true
+                    },
+                    select: ['password'],
+                })
+                if (!technician) throw new BadRequestException("Không tìm thấy Kỹ thuật viên đang hoạt động với mã số này, vui lòng kiểm tra lại!")
+                const compare = await comparePassword(currentPassword, technician.password)
+                if (!compare) throw new UnauthorizedException("Sai mật khẩu, vui lòng kiểm tra lại!")
+                const hash = await hashPassword(newPassword)
+                const update = await this.techniciansRepository.update(id, { password: hash })
+                if (update.affected === 0) throw new BadRequestException("Lỗi khi cập nhật mật khẩu!")
+                return {
+                    message: "Đổi mật khẩu thành công",
+                }
+            }
+            case "receptionist": {
+                const receptionist = await this.receptionistsRepository.findOne({
+                    where: {
+                        id: id,
+                        active: true
+                    },
+                    select: ['password'],
+                })
+                if (!receptionist) throw new BadRequestException("Không tìm thấy lễ tân đang hoạt động với mã số này, vui lòng kiểm tra lại!")
+                const compare = await comparePassword(currentPassword, receptionist.password)
+                if (!compare) throw new UnauthorizedException("Sai mật khẩu, vui lòng kiểm tra lại!")
+                const hash = await hashPassword(newPassword)
+                const update = await this.receptionistsRepository.update(id, { password: hash })
+                if (update.affected === 0) throw new BadRequestException("Lỗi khi cập nhật mật khẩu!")
+                return {
+                    message: "Đổi mật khẩu thành công",
+                }
+            }
+            case "director": {
+                const director = await this.directorsRepository.findOne({
+                    where: {
+                        id: id,
+                        active: true
+                    },
+                    select: ['password'],
+                })
+                if (!director) throw new BadRequestException("Không tìm thấy trưởng ban quản lý đang hoạt động với mã số này, vui lòng kiểm tra lại!")
+                const compare = await comparePassword(currentPassword, director.password)
+                if (!compare) throw new UnauthorizedException("Sai mật khẩu, vui lòng kiểm tra lại!")
+                const hash = await hashPassword(newPassword)
+                const update = await this.directorsRepository.update(id, { password: hash })
+                if (update.affected === 0) throw new BadRequestException("Lỗi khi cập nhật mật khẩu!")
+                return {
+                    message: "Đổi mật khẩu thành công",
+                }
+            }
+            case "regent": {
+                const regent = await this.regentsRepository.findOne({
+                    where: {
+                        id: id,
+                        active: true
+                    },
+                    select: ['password'],
+                })
+                if (!regent) throw new BadRequestException("Không tìm thấy trưởng ban quản lý đang hoạt động với mã số này, vui lòng kiểm tra lại!")
+                const compare = await comparePassword(currentPassword, regent.password)
+                if (!compare) throw new UnauthorizedException("Sai mật khẩu, vui lòng kiểm tra lại!")
+                const hash = await hashPassword(newPassword)
+                const update = await this.regentsRepository.update(id, { password: hash })
                 if (update.affected === 0) throw new BadRequestException("Lỗi khi cập nhật mật khẩu!")
                 return {
                     message: "Đổi mật khẩu thành công",
