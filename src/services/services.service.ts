@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Service } from './entities/service.entity';
 import { In, Repository } from 'typeorm';
 import { Apartment } from 'src/apartments/entities/apartment.entity';
-import { Tentant } from 'src/tentants/entities/tentant.entity';
+import { Tenant } from 'src/tenants/entities/tenant.entity';
 import { roles } from 'src/helpers/utils';
 
 @Injectable()
@@ -17,8 +17,8 @@ export class ServicesService {
     @InjectRepository(Apartment)
     private apartmentsRepository: Repository<Apartment>,
 
-    @InjectRepository(Tentant)
-    private tentantsRepository: Repository<Tentant>
+    @InjectRepository(Tenant)
+    private tenantsRepository: Repository<Tenant>
   ) { }
   async create(createServiceDto: CreateServiceDto) {
     const { number, type, area, startDate, endDate, reason } = createServiceDto
@@ -54,12 +54,12 @@ export class ServicesService {
         })
         return services
       }
-      case "tentant": {
-        const tentant = await this.tentantsRepository.findOne({
+      case "tenant": {
+        const tenant = await this.tenantsRepository.findOne({
           where: user,
           relations: ["apartment"],
         })
-        const apartmentNumber = tentant.apartment.number
+        const apartmentNumber = tenant.apartment.number
         const services = this.servicesRepository.find({
           where: {
             apartment: {

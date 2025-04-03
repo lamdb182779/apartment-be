@@ -1,4 +1,4 @@
-import { Tentant } from "src/tentants/entities/tentant.entity";
+import { Tenant } from "src/tenants/entities/tenant.entity";
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()
@@ -15,8 +15,8 @@ export class Vehicle {
     @Column()
     image: string;
 
-    @ManyToOne(() => Tentant, tentant => tentant.vehicles)
-    tentant: Tentant
+    @ManyToOne(() => Tenant, tenant => tenant.vehicles)
+    tenant: Tenant
 
     @CreateDateColumn()
     createdAt: Date

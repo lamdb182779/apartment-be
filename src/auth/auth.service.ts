@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Accountant } from 'src/accountants/entities/accountant.entity';
 import { comparePassword, generateSecureOtp, getName, hashPassword, maskEmail, roles } from 'src/helpers/utils';
 import { Owner } from 'src/owners/entities/owner.entity';
-import { Tentant } from 'src/tentants/entities/tentant.entity';
+import { Tenant } from 'src/tenants/entities/tenant.entity';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
@@ -34,8 +34,8 @@ export class AuthService {
         @InjectRepository(Regent)
         private regentsRepository: Repository<Regent>,
 
-        @InjectRepository(Tentant)
-        private tentantsRepository: Repository<Tentant>,
+        @InjectRepository(Tenant)
+        private tenantsRepository: Repository<Tenant>,
 
         private jwtService: JwtService,
 
@@ -75,18 +75,18 @@ export class AuthService {
                 const { password, ...result } = accountant
                 return result
             }
-            case "tentant": {
-                const tentant = await this.tentantsRepository.findOne({
+            case "tenant": {
+                const tenant = await this.tenantsRepository.findOne({
                     where: {
                         username: username,
                         active: true
                     },
                     select: ['id', 'username', 'email', 'password', "active", "image", "name", "phone", "role", "apartment", "isVerify"],
                 })
-                if (!tentant) throw new UnauthorizedException("Không tìm thấy cư dân đang hoạt động với tài khoản này, vui lòng kiểm tra lại!")
-                const compare = await comparePassword(plainPassword, tentant.password)
+                if (!tenant) throw new UnauthorizedException("Không tìm thấy cư dân đang hoạt động với tài khoản này, vui lòng kiểm tra lại!")
+                const compare = await comparePassword(plainPassword, tenant.password)
                 if (!compare) throw new UnauthorizedException("Sai mật khẩu, vui lòng kiểm tra lại!")
-                const { password, ...result } = tentant
+                const { password, ...result } = tenant
                 return result
             }
             case "receptionist": {
@@ -203,23 +203,23 @@ export class AuthService {
                     message: `Mã xác thực đã được gửi tới email ${maskEmail(owner.email)}. Vui lòng kiểm tra và xác thực.`,
                 }
             }
-            case "tentant": {
-                const tentant = await this.tentantsRepository.findOne({
+            case "tenant": {
+                const tenant = await this.tenantsRepository.findOne({
                     where: {
                         username: id,
                         active: true
                     },
                     select: ['id', 'email', "name", "active", "isVerify", "expiredAt", "verifyId"],
                 })
-                if (!tentant) throw new BadRequestException("Không tìm thấy cư dân đang hoạt động với mã số này, vui lòng kiểm tra lại!")
-                if (tentant.isVerify) throw new BadRequestException("Tài khoản này đã được xác thực email!")
-                if (tentant.expiredAt && isAfter(tentant.expiredAt, add(new Date(), { minutes: 3 }))) {
+                if (!tenant) throw new BadRequestException("Không tìm thấy cư dân đang hoạt động với mã số này, vui lòng kiểm tra lại!")
+                if (tenant.isVerify) throw new BadRequestException("Tài khoản này đã được xác thực email!")
+                if (tenant.expiredAt && isAfter(tenant.expiredAt, add(new Date(), { minutes: 3 }))) {
                     return {
-                        message: `Mã xác thực đã được gửi tới email ${maskEmail(tentant.email)} cách đây ít phút. Chưa thể gửi mã mới ngay. Vui lòng kiểm tra email gần nhất`,
+                        message: `Mã xác thực đã được gửi tới email ${maskEmail(tenant.email)} cách đây ít phút. Chưa thể gửi mã mới ngay. Vui lòng kiểm tra email gần nhất`,
                     }
                 }
                 const verifyId = generateSecureOtp()
-                const update = await this.tentantsRepository.update(tentant.id, {
+                const update = await this.tenantsRepository.update(tenant.id, {
                     expiredAt: add(new Date(), { minutes: 5 }),
                     verifyId
                 })
@@ -227,19 +227,19 @@ export class AuthService {
 
                 this.mailerService
                     .sendMail({
-                        to: tentant.email,
+                        to: tenant.email,
                         subject: 'Xác nhận email tài khoản cư dân',
                         text: 'Welcome',
                         template: "verify",
                         context: {
-                            name: tentant.name,
+                            name: tenant.name,
                             verifyId
                         }
                     })
                     .then(() => { })
                     .catch(() => { });
                 return {
-                    message: `Mã xác thực đã được gửi tới email ${maskEmail(tentant.email)}. Vui lòng kiểm tra và xác thực.`,
+                    message: `Mã xác thực đã được gửi tới email ${maskEmail(tenant.email)}. Vui lòng kiểm tra và xác thực.`,
                 }
             }
             default: throw new BadRequestException("Không tìm thấy mã vai trò tương ứng!")
@@ -269,20 +269,20 @@ export class AuthService {
                     message: "Xác thực thành công, vui lòng đăng nhập lại",
                 }
             }
-            case "tentant": {
-                const tentant = await this.tentantsRepository.findOne({
+            case "tenant": {
+                const tenant = await this.tenantsRepository.findOne({
                     where: {
                         username: id,
                         active: true
                     },
                     select: ['id', 'email', 'password', "active", "image", "name", "phone", "role", "apartment", "isVerify", "expiredAt", "verifyId"],
                 })
-                if (!tentant) throw new BadRequestException("Không tìm thấy cư dân đang hoạt động với mã số này, vui lòng kiểm tra lại!")
-                if (tentant.isVerify) throw new BadRequestException("Tài khoản này đã được xác thực email!")
-                if (otp !== tentant.verifyId) throw new BadRequestException("Mã xác thực không chính xác!")
-                if (tentant.expiredAt === null || isBefore(tentant.expiredAt, new Date())) throw new BadRequestException("Mã xác thực đã hết hạn!")
+                if (!tenant) throw new BadRequestException("Không tìm thấy cư dân đang hoạt động với mã số này, vui lòng kiểm tra lại!")
+                if (tenant.isVerify) throw new BadRequestException("Tài khoản này đã được xác thực email!")
+                if (otp !== tenant.verifyId) throw new BadRequestException("Mã xác thực không chính xác!")
+                if (tenant.expiredAt === null || isBefore(tenant.expiredAt, new Date())) throw new BadRequestException("Mã xác thực đã hết hạn!")
 
-                const update = await this.tentantsRepository.update(tentant.id, { isVerify: true })
+                const update = await this.tenantsRepository.update(tenant.id, { isVerify: true })
                 if (update.affected === 0) throw new BadRequestException("Lỗi khi cập nhật xác thực!")
                 return {
                     message: "Xác thực thành công, vui lòng đăng nhập lại",
@@ -314,19 +314,19 @@ export class AuthService {
                     message: "Đổi mật khẩu thành công",
                 }
             }
-            case "tentant": {
-                const tentant = await this.tentantsRepository.findOne({
+            case "tenant": {
+                const tenant = await this.tenantsRepository.findOne({
                     where: {
                         id: id,
                         active: true
                     },
                     select: ['password'],
                 })
-                if (!tentant) throw new BadRequestException("Không tìm thấy cư dân đang hoạt động với mã số này, vui lòng kiểm tra lại!")
-                const compare = await comparePassword(currentPassword, tentant.password)
+                if (!tenant) throw new BadRequestException("Không tìm thấy cư dân đang hoạt động với mã số này, vui lòng kiểm tra lại!")
+                const compare = await comparePassword(currentPassword, tenant.password)
                 if (!compare) throw new UnauthorizedException("Sai mật khẩu, vui lòng kiểm tra lại!")
                 const hash = await hashPassword(newPassword)
-                const update = await this.tentantsRepository.update(id, { password: hash })
+                const update = await this.tenantsRepository.update(id, { password: hash })
                 if (update.affected === 0) throw new BadRequestException("Lỗi khi cập nhật mật khẩu!")
                 return {
                     message: "Đổi mật khẩu thành công",

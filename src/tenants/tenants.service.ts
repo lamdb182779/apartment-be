@@ -1,33 +1,33 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateTentantDto } from './dto/create-tentant.dto';
-import { UpdateTentantDto } from './dto/update-tentant.dto';
+import { CreateTenantDto } from './dto/create-tentant.dto';
+import { UpdateTenantDto } from './dto/update-tentant.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Tentant } from './entities/tentant.entity';
+import { Tenant } from './entities/tenant.entity';
 import { Repository } from 'typeorm';
 import { Apartment } from 'src/apartments/entities/apartment.entity';
 import { generateUsername, hashPassword, transformFilterToILike } from 'src/helpers/utils';
 import { add } from 'date-fns';
 
 @Injectable()
-export class TentantsService {
+export class TenantsService {
   constructor(
-    @InjectRepository(Tentant)
-    private tentantsRepository: Repository<Tentant>,
+    @InjectRepository(Tenant)
+    private tenantsRepository: Repository<Tenant>,
 
     @InjectRepository(Apartment)
     private apartmentsRepository: Repository<Apartment>,
 
   ) { }
-  async create(createTentantDto: CreateTentantDto) {
-    const { name, image, email, phone, number } = createTentantDto
-    const existingEmail = await this.tentantsRepository.findOne({ where: { email } })
+  async create(createTenantDto: CreateTenantDto) {
+    const { name, image, email, phone, number } = createTenantDto
+    const existingEmail = await this.tenantsRepository.findOne({ where: { email } })
     if (existingEmail) throw new BadRequestException([`Email ${email} đã tồn tại, vui lòng kiểm tra lại!`])
     let isUnique = false
     let username: string
     let hash: string
     while (!isUnique) {
-      username = generateUsername(createTentantDto.name)
-      const existingUser = await this.tentantsRepository.findOne({ where: { username } })
+      username = generateUsername(createTenantDto.name)
+      const existingUser = await this.tenantsRepository.findOne({ where: { username } })
       if (!existingUser) {
         isUnique = true
         hash = await hashPassword(username)
@@ -38,17 +38,17 @@ export class TentantsService {
       number
     })
 
-    const tentant = await this.tentantsRepository.save({
+    const tenant = await this.tenantsRepository.save({
       name, image, email, apartment, phone, username,
       password: hash,
     })
 
     return {
-      id: tentant.id,
-      name: tentant.name,
-      email: tentant.email,
-      number: tentant.apartment.number,
-      username: tentant.username
+      id: tenant.id,
+      name: tenant.name,
+      email: tenant.email,
+      number: tenant.apartment.number,
+      username: tenant.username
     }
   }
 
@@ -57,7 +57,7 @@ export class TentantsService {
     pageSize = (pageSize && pageSize > 0) ? pageSize : 10
     orderBy = (orderBy === "DESC") ? orderBy : "ASC"
 
-    const [tentants, count] = await this.tentantsRepository.findAndCount({
+    const [tenants, count] = await this.tenantsRepository.findAndCount({
       where: transformFilterToILike(filter),
       take: pageSize,
       skip: (current - 1) * pageSize,
@@ -66,18 +66,18 @@ export class TentantsService {
       },
       relations: ["apartment"]
     })
-    return { results: tentants.map(({ createdAt, updatedAt, ...tentant }) => tentant), totalPages: Math.ceil(count / pageSize) }
+    return { results: tenants.map(({ createdAt, updatedAt, ...tenant }) => tenant), totalPages: Math.ceil(count / pageSize) }
   }
 
   findOne(id: string) {
-    return `This action returns a #${id} tentant`;
+    return `This action returns a #${id} tenant`;
   }
 
-  update(id: string, updateTentantDto: UpdateTentantDto) {
-    return `This action updates a #${id} tentant`;
+  update(id: string, updateTenantDto: UpdateTenantDto) {
+    return `This action updates a #${id} tenant`;
   }
 
   remove(id: string) {
-    return `This action removes a #${id} tentant`;
+    return `This action removes a #${id} tenant`;
   }
 }

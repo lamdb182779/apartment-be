@@ -81,11 +81,11 @@ export class OwnersService {
           id,
         },
       },
-      relations: ["owner", "tentants"]
+      relations: ["owner", "tenants"]
     })
-    return apartments.map(({ createdAt, updatedAt, owner, tentants, ...apartment }) => {
+    return apartments.map(({ createdAt, updatedAt, owner, tenants, ...apartment }) => {
       return {
-        ...apartment, tentants: tentants.map(({ name, active }) => active ? name : null).filter(Boolean)
+        ...apartment, tenants: tenants.map(({ name, active }) => active ? name : null).filter(Boolean)
       }
     })
   }

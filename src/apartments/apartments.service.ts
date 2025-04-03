@@ -47,9 +47,9 @@ export class ApartmentsService {
           month: Between(subMonths(now, 6), now),
         },
       },
-      relations: ["parameters", "tentants", "rooms"]
+      relations: ["parameters", "tenants", "rooms"]
     })
-    const { updatedAt, createdAt, parameters, tentants, rooms, ...result } = apartment
+    const { updatedAt, createdAt, parameters, tenants, rooms, ...result } = apartment
     return {
       ...result, parameters: parameters.reduce((acc, parameter) => {
         if (parameter.type === "electric") {
@@ -59,7 +59,7 @@ export class ApartmentsService {
         }
         return acc
       }, { electric: [], water: [] }),
-      tentants: tentants.map(({ name, active }) => active ? name : null).filter(Boolean),
+      tenants: tenants.map(({ name, active }) => active ? name : null).filter(Boolean),
       rooms: rooms.map(({ createdAt, updatedAt, ...room }) => room)
     }
   }

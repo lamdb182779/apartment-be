@@ -3,7 +3,7 @@ import { Vehicle } from 'src/vehicles/entities/vehicle.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, BeforeUpdate, OneToMany } from 'typeorm';
 
 @Entity()
-export class Tentant {
+export class Tenant {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
@@ -40,11 +40,11 @@ export class Tentant {
     @Column({ nullable: true })
     expiredAt: Date;
 
-    @ManyToOne(() => Apartment, apartment => apartment.tentants, { nullable: true })
+    @ManyToOne(() => Apartment, apartment => apartment.tenants, { nullable: true })
     @JoinColumn()
     apartment: Apartment
 
-    @OneToMany(() => Vehicle, vehicle => vehicle.tentant, { onDelete: "CASCADE" })
+    @OneToMany(() => Vehicle, vehicle => vehicle.tenant, { onDelete: "CASCADE" })
     vehicles: Vehicle[]
 
     @CreateDateColumn()

@@ -94,7 +94,7 @@ export class IdParamDto {
 export const roles = {
     accountant: 22,
     owner: 31,
-    tentant: 32,
+    tenant: 32,
     director: 12,
     regent: 11,
     technician: 23,

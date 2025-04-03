@@ -11,7 +11,7 @@ import { Receptionist } from 'src/receptionists/entities/receptionist.entity';
 import { Technician } from 'src/technicians/entities/technician.entity';
 import { Director } from 'src/directors/entities/director.entity';
 import { Regent } from 'src/regents/entities/regent.entity';
-import { Tentant } from 'src/tentants/entities/tentant.entity';
+import { Tenant } from 'src/tenants/entities/tenant.entity';
 import { roles } from 'src/helpers/utils';
 
 @Injectable()
@@ -37,8 +37,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     @InjectRepository(Regent)
     private regentsRepository: Repository<Regent>,
 
-    @InjectRepository(Tentant)
-    private tentantsRepository: Repository<Tentant>,
+    @InjectRepository(Tenant)
+    private tenantsRepository: Repository<Tenant>,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -68,13 +68,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         if (!accountant) throw new UnauthorizedException("Không tìm thấy kế toán đang hoạt động với tài khoản này, vui lòng kiểm tra lại!")
         return accountant
       }
-      case "tentant": {
-        const tentant = await this.tentantsRepository.findOneBy({
+      case "tenant": {
+        const tenant = await this.tenantsRepository.findOneBy({
           id,
           active: true
         })
-        if (!tentant) throw new UnauthorizedException("Không tìm thấy cư dân đang hoạt động với tài khoản này, vui lòng kiểm tra lại!")
-        return tentant
+        if (!tenant) throw new UnauthorizedException("Không tìm thấy cư dân đang hoạt động với tài khoản này, vui lòng kiểm tra lại!")
+        return tenant
       }
       case "receptionist": {
         const receptionist = await this.receptionistsRepository.findOneBy({
