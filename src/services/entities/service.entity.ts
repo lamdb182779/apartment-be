@@ -7,13 +7,25 @@ export class Service {
     id: string;
 
     @Column()
-    title: string;
+    type: string;
 
-    @Column("simple-json")
-    content: any[];
+    @Column({ type: 'date' })
+    startDate: Date;
+
+    @Column({ type: 'date' })
+    endDate: Date;
+
+    @Column()
+    area: string;
+
+    @Column({ default: "Chờ xác nhận" })
+    status: string;
 
     @Column({ default: false })
     isComplete: boolean;
+
+    @Column({ nullable: true })
+    reason: string;
 
     @ManyToOne(() => Apartment, apartment => apartment.services)
     apartment: Apartment

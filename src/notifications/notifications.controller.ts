@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Request } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
@@ -13,13 +13,31 @@ export class NotificationsController {
   }
 
   @Get()
-  findAll() {
-    return this.notificationsService.findAll();
+  findAll(@Query() query: Record<string, string>) {
+    const { current, pageSize } = query
+    return this.notificationsService.findAll(+current, +pageSize);
+  }
+
+  @Get("self")
+  findAllByUser(@Query() query: Record<string, string>, @Request() req) {
+    const { current, pageSize } = query
+    const user = req.user
+    return this.notificationsService.findAllByUser(+current, +pageSize, user);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.notificationsService.findOne(id);
+  findOne(@Param('id') id: string, @Request() req) {
+    return this.notificationsService.findOne(id, req.user);
+  }
+
+  @Patch("readed")
+  updateReaded(@Body() body, @Request() req) {
+    return this.notificationsService.updateReaded(body.id, req.user)
+  }
+
+  @Patch("readedall")
+  updateReadedAll(@Request() req) {
+    return this.notificationsService.updateReadedAll(req.user)
   }
 
   @Patch(':id')

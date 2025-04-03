@@ -1,23 +1,105 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Service } from './entities/service.entity';
+import { In, Repository } from 'typeorm';
+import { Apartment } from 'src/apartments/entities/apartment.entity';
+import { Tentant } from 'src/tentants/entities/tentant.entity';
+import { roles } from 'src/helpers/utils';
 
 @Injectable()
 export class ServicesService {
-  create(createServiceDto: CreateServiceDto) {
-    return 'This action adds a new service';
+  constructor(
+    @InjectRepository(Service)
+    private servicesRepository: Repository<Service>,
+
+    @InjectRepository(Apartment)
+    private apartmentsRepository: Repository<Apartment>,
+
+    @InjectRepository(Tentant)
+    private tentantsRepository: Repository<Tentant>
+  ) { }
+  async create(createServiceDto: CreateServiceDto) {
+    const { number, type, area, startDate, endDate, reason } = createServiceDto
+    const apartment = await this.apartmentsRepository.findOneBy({ number })
+    const service = await this.servicesRepository.save(
+      { type, area, startDate, endDate, reason, apartment }
+    )
+    return { message: 'Tạo yêu cầu thành công' };
   }
 
   findAll() {
     return `This action returns all services`;
   }
 
-  findOne(id: string) {
-    return `This action returns a #${id} service`;
+  async findAllByApartment(user: any) {
+    const role = user.role
+    const key = Object.keys(roles).find(key => roles[key] === role)
+    switch (key) {
+      case "owner": {
+        const apartments = await this.apartmentsRepository.find({
+          relations: ["owner"],
+          where: { owner: { id: user.id } },
+          select: ["number"],
+        })
+        const apartmentNumbers = apartments.map(apartment => apartment.number)
+        const services = this.servicesRepository.find({
+          where: {
+            apartment: {
+              number: In(apartmentNumbers)
+            }
+          },
+          relations: ["apartment"]
+        })
+        return services
+      }
+      case "tentant": {
+        const tentant = await this.tentantsRepository.findOne({
+          where: user,
+          relations: ["apartment"],
+        })
+        const apartmentNumber = tentant.apartment.number
+        const services = this.servicesRepository.find({
+          where: {
+            apartment: {
+              number: apartmentNumber
+            }
+          },
+          relations: ["apartment"]
+        })
+        return services
+      }
+      default: throw new BadRequestException("Vai trò người dùng không phù hợp!")
+    }
   }
 
-  update(id: string, updateServiceDto: UpdateServiceDto) {
-    return `This action updates a #${id} service`;
+  async findOne(id: string) {
+    const service = await this.servicesRepository.findOne({
+      where: {
+        id
+      },
+      relations: ["apartment"]
+    })
+    return service;
+  }
+
+  async status(id: string, status: string) {
+    const service = await this.servicesRepository.update({
+      id
+    }, { status })
+
+    return { message: "Cập nhật thành công" };
+  }
+
+  async update(id: string, updateServiceDto: UpdateServiceDto) {
+    const { number, ...rest } = updateServiceDto
+    const apartment = await this.apartmentsRepository.findOneBy({ number })
+    const service = await this.servicesRepository.update({
+      id
+    }, { ...rest, apartment })
+
+    return { message: "Cập nhật thành công" };
   }
 
   remove(id: string) {

@@ -17,7 +17,7 @@ export class OwnersService {
     private apartmentsRepository: Repository<Apartment>
   ) { }
   async create(createOwnerDto: CreateOwnerDto) {
-    const { name, image, email, phone } = createOwnerDto
+    const { name, email, phone, apartments } = createOwnerDto
     const existingEmail = await this.ownersRepository.findOne({ where: { email } })
     if (existingEmail) throw new BadRequestException([`Email ${email} đã tồn tại, vui lòng kiểm tra lại!`])
     let isUnique = false
@@ -33,10 +33,22 @@ export class OwnersService {
     }
 
     const owner = await this.ownersRepository.save({
-      name, image, email, phone, username,
+      name, email, phone, username,
       password: hash,
     })
+    const numberErrors = []
+    const errors = []
+    for (const number of apartments) {
+      const apartment = await this.apartmentsRepository.createQueryBuilder()
+        .update(Apartment)
+        .set({ owner })
+        .where('number = :number AND owner IS NULL', { number })
+        .execute()
+      if (apartment.affected === 0) numberErrors.push(number)
+    }
+    if (numberErrors.length > 0) errors.push(`Không thể thêm quyền sở hữu căn hộ ${numberErrors.join(", ")}!`)
 
+    if (errors.length > 0) throw new BadRequestException(errors)
     return {
       id: owner.id,
       name: owner.name,
@@ -56,7 +68,8 @@ export class OwnersService {
       skip: (current - 1) * pageSize,
       order: {
         createdAt: orderBy as any
-      }
+      },
+      relations: ["apartments"]
     })
     return { results: owners.map(({ createdAt, updatedAt, ...owner }) => owner), totalPages: Math.ceil(count / pageSize) }
   }

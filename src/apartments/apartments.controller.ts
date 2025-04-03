@@ -19,6 +19,11 @@ export class ApartmentsController {
     return this.apartmentsService.findAll(filter, +current, +pageSize, orderBy);
   }
 
+  @Get('allnumber')
+  findAllNumber() {
+    return this.apartmentsService.findAllNumber();
+  }
+
   @Get('ownerless')
   findOwnerless() {
     return this.apartmentsService.findOwnerless()

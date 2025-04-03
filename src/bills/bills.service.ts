@@ -37,7 +37,7 @@ export class BillsService {
       apartment,
     })
 
-    return { message: "Cập nhật thành công" }
+    return { message: "Tạo hóa đơn thành công" }
   }
 
   async findAll(month: string, floor?: number) {

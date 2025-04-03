@@ -48,7 +48,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    const { role, id, ...result } = payload
+    const { role, id } = payload
     const key = Object.keys(roles).find(key => roles[key] === role)
     if (!key) throw new BadRequestException("Không tìm thấy mã vai trò tương ứng!")
     switch (key) {

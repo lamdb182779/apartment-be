@@ -19,7 +19,7 @@ export class ApartmentsService {
   async findAll(filter: Record<string, string>, current: number, pageSize: number, orderBy: string) {
     current = (current && current > 0) ? current : 1
     pageSize = (pageSize && pageSize > 0) ? pageSize : 10
-    orderBy = (orderBy === "DESC") ? orderBy : "ASC"
+    orderBy = (orderBy === "ASC") ? orderBy : "DESC"
 
     const [apartments, count] = await this.apartmentsRepository.findAndCount({
       where: filter,
@@ -27,10 +27,15 @@ export class ApartmentsService {
       take: pageSize,
       skip: (current - 1) * pageSize,
       order: {
-        floor: orderBy as any
+        number: orderBy as any
       }
     })
     return { results: apartments, totalPages: Math.ceil(count / pageSize) }
+  }
+
+  async findAllNumber() {
+    const apartments = await this.apartmentsRepository.find()
+    return apartments.map(({ number }) => number)
   }
 
   async findOne(number: number) {

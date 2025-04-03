@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Request } from '@nestjs/common';
 import { ServicesService } from './services.service';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
@@ -17,9 +17,19 @@ export class ServicesController {
     return this.servicesService.findAll();
   }
 
+  @Get("self")
+  findAllByApartment(@Request() req) {
+    return this.servicesService.findAllByApartment(req.user);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.servicesService.findOne(id);
+  }
+
+  @Patch('status')
+  status(@Body() body) {
+    return this.servicesService.status(body.id, body.status);
   }
 
   @Patch(':id')

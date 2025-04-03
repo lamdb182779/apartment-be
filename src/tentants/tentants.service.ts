@@ -63,7 +63,8 @@ export class TentantsService {
       skip: (current - 1) * pageSize,
       order: {
         createdAt: orderBy as any
-      }
+      },
+      relations: ["apartment"]
     })
     return { results: tentants.map(({ createdAt, updatedAt, ...tentant }) => tentant), totalPages: Math.ceil(count / pageSize) }
   }
