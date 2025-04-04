@@ -31,6 +31,9 @@ export class Apartment {
     @Column({ default: false })
     tenantLooking: boolean;
 
+    @Column({ nullable: true })
+    rentStart: Date;
+
     @Column({ default: true })
     hasBalcony: boolean;
 
@@ -39,6 +42,9 @@ export class Apartment {
 
     @Column("decimal", { default: 0 })
     debt: number
+
+    @Column({ nullable: true })
+    image: string;
 
     @ManyToOne(() => Owner, owner => owner.apartments, { nullable: true })
     owner: Owner
