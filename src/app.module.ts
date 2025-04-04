@@ -9,7 +9,7 @@ import { ParametersModule } from './parameters/parameters.module';
 import { ApartmentsModule } from './apartments/apartments.module';
 import { BillsModule } from './bills/bills.module';
 import { OwnersModule } from './owners/owners.module';
-import { TenantsModule } from './tenants/tenants.module';
+import { ResidentsModule } from './residents/residents.module';
 import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
@@ -60,7 +60,7 @@ import { PaymentsModule } from './payments/payments.module';
     ApartmentsModule,
     BillsModule,
     OwnersModule,
-    TenantsModule,
+    ResidentsModule,
     TechniciansModule,
     VisitorsModule,
     ServicesModule,

@@ -1,6 +1,6 @@
 import { IsEmail, IsInt, IsNotEmpty, IsString, Matches, ValidateIf } from "class-validator";
 
-export class CreateTenantDto {
+export class CreateResidentDto {
     @IsNotEmpty({ message: "Tên không được để trống!" })
     @IsString({ message: "Tên phải là một chuỗi văn bản!" })
     name: string;

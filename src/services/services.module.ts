@@ -4,10 +4,10 @@ import { ServicesController } from './services.controller';
 import { Apartment } from 'src/apartments/entities/apartment.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Service } from './entities/service.entity';
-import { Tenant } from 'src/tenants/entities/tenant.entity';
+import { Resident } from 'src/residents/entities/resident.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Service, Apartment, Tenant])],
+  imports: [TypeOrmModule.forFeature([Service, Apartment, Resident])],
   controllers: [ServicesController],
   providers: [ServicesService],
 })

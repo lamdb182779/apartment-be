@@ -4,7 +4,7 @@ import { Owner } from 'src/owners/entities/owner.entity';
 import { Parameter } from 'src/parameters/entities/parameter.entity';
 import { Room } from 'src/rooms/entities/room.entity';
 import { Service } from 'src/services/entities/service.entity';
-import { Tenant } from 'src/tenants/entities/tenant.entity';
+import { Resident } from 'src/residents/entities/resident.entity';
 import { Visitor } from 'src/visitors/entities/visitor.entity';
 import { Entity, Column, PrimaryColumn, OneToMany, ManyToOne, CreateDateColumn, UpdateDateColumn, BeforeUpdate } from 'typeorm';
 
@@ -52,8 +52,8 @@ export class Apartment {
     @OneToMany(() => Parameter, parameter => parameter.apartment, { onDelete: "CASCADE" })
     parameters: Parameter[]
 
-    @OneToMany(() => Tenant, tenant => tenant.apartment, { onDelete: "SET NULL" })
-    tenants: Tenant[]
+    @OneToMany(() => Resident, resident => resident.apartment, { onDelete: "SET NULL" })
+    residents: Resident[]
 
     @OneToMany(() => Visitor, visitor => visitor.apartment, { onDelete: "SET NULL" })
     visitors: Visitor[]

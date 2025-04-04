@@ -3,7 +3,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Owner } from 'src/owners/entities/owner.entity';
-import { Tenant } from 'src/tenants/entities/tenant.entity';
+import { Resident } from 'src/residents/entities/resident.entity';
 import { Accountant } from 'src/accountants/entities/accountant.entity';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './local.strategy';
@@ -18,7 +18,7 @@ import { Director } from 'src/directors/entities/director.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Owner, Tenant, Accountant, Receptionist, Technician, Regent, Director]),
+    TypeOrmModule.forFeature([Owner, Resident, Accountant, Receptionist, Technician, Regent, Director]),
     PassportModule,
     JwtModule.registerAsync({
       inject: [ConfigService],

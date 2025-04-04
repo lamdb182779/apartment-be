@@ -6,7 +6,7 @@ import { Notification, NotificationApartment } from './entities/notification.ent
 import { In, Repository } from 'typeorm';
 import { Apartment } from 'src/apartments/entities/apartment.entity';
 import { roles } from 'src/helpers/utils';
-import { Tenant } from 'src/tenants/entities/tenant.entity';
+import { Resident } from 'src/residents/entities/resident.entity';
 
 @Injectable()
 export class NotificationsService {
@@ -20,8 +20,8 @@ export class NotificationsService {
     @InjectRepository(Apartment)
     private apartmentsRepository: Repository<Apartment>,
 
-    @InjectRepository(Tenant)
-    private tenantsRepository: Repository<Tenant>
+    @InjectRepository(Resident)
+    private residentsRepository: Repository<Resident>
   ) { }
   async create(createNotificationDto: CreateNotificationDto) {
     const { apartments, content, title, describe } = createNotificationDto
@@ -97,12 +97,12 @@ export class NotificationsService {
           totalPages: Math.ceil(count / pageSize)
         }
       }
-      case "tenant": {
-        const tenant = await this.tenantsRepository.findOne({
+      case "resident": {
+        const resident = await this.residentsRepository.findOne({
           where: user,
           relations: ["apartment"],
         })
-        const apartmentNumber = tenant.apartment.number
+        const apartmentNumber = resident.apartment.number
         const [notifications, count] = await this.notificationsRepository.findAndCount({
           relations: ['apartments'],
           where: {
@@ -150,12 +150,12 @@ export class NotificationsService {
         })
         return notification;
       }
-      case "tenant": {
-        const tenant = await this.tenantsRepository.findOne({
+      case "resident": {
+        const resident = await this.residentsRepository.findOne({
           where: user,
           relations: ["apartment"],
         })
-        const apartmentNumber = tenant.apartment.number
+        const apartmentNumber = resident.apartment.number
         const notification = await this.notificationsRepository.findOne({
           relations: ['apartments'],
           where: {
@@ -195,12 +195,12 @@ export class NotificationsService {
         if (update.affected === 0) throw new BadRequestException("Thông báo không phù hợp đánh dấu đã đọc!")
         return { message: "Đánh dấu thông báo đã đọc" }
       }
-      case "tenant": {
-        const tenant = await this.tenantsRepository.findOne({
+      case "resident": {
+        const resident = await this.residentsRepository.findOne({
           where: user,
           relations: ["apartment"],
         })
-        const apartmentNumber = tenant.apartment.number
+        const apartmentNumber = resident.apartment.number
         const update = await this.notificationApartmentsRepository.update({
           notification: {
             id
@@ -239,12 +239,12 @@ export class NotificationsService {
         )
         return { message: "Đánh dấu tất cả là đã đọc" }
       }
-      case "tenant": {
-        const tenant = await this.tenantsRepository.findOne({
+      case "resident": {
+        const resident = await this.residentsRepository.findOne({
           where: user,
           relations: ["apartment"],
         })
-        const apartmentNumber = tenant.apartment.number
+        const apartmentNumber = resident.apartment.number
         const update = await this.notificationApartmentsRepository.update({
           apartment: {
             number: apartmentNumber
