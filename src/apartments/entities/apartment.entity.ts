@@ -34,6 +34,9 @@ export class Apartment {
     @Column({ nullable: true })
     rentStart: Date;
 
+    @Column({ nullable: true })
+    advertisement: string;
+
     @Column({ default: true })
     hasBalcony: boolean;
 

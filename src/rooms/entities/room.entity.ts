@@ -12,6 +12,9 @@ export class Room {
     @Column()
     image: string;
 
+    @Column("integer", { default: 0 })
+    type: number
+
     @Column("decimal")
     acreage: number;
 

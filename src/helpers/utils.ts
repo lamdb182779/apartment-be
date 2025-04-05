@@ -101,4 +101,12 @@ export const roles = {
     receptionist: 21
 }
 
+export const roomType = {
+    livingroom: 1,
+    kitchen: 2,
+    bedroom: 3,
+    toilet: 4,
+    another: 0
+}
+
 
