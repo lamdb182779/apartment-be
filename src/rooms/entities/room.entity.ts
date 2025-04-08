@@ -9,7 +9,7 @@ export class Room {
     @Column()
     name: string;
 
-    @Column()
+    @Column({ nullable: true })
     image: string;
 
     @Column("integer", { default: 0 })

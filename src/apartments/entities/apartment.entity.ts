@@ -22,9 +22,6 @@ export class Apartment {
     @Column("decimal")
     acreage: number;
 
-    @Column("decimal", { nullable: true })
-    rentPrice: number;
-
     @Column({ default: false })
     maintaining: boolean;
 
@@ -33,6 +30,12 @@ export class Apartment {
 
     @Column({ nullable: true })
     rentStart: Date;
+
+    @Column("decimal", { default: 0 })
+    rentPrice: number;
+
+    @Column({ nullable: true })
+    adTitle: string;
 
     @Column({ nullable: true })
     advertisement: string;

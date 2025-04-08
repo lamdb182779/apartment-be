@@ -39,6 +39,11 @@ export class ApartmentsController {
     return this.apartmentsService.checkOwnered(+number)
   }
 
+  @Get('tenant-looking')
+  tenantLooking() {
+    return this.apartmentsService.tenantLooking()
+  }
+
   @Get('nearest')
   findNearest(@Query() query: Record<string, string>) {
     const { number, time } = query
@@ -48,6 +53,16 @@ export class ApartmentsController {
   @Get(':number')
   findOne(@Param('number') number: string) {
     return this.apartmentsService.findOne(+number);
+  }
+
+  @Patch('change-tenant-looking/:number')
+  changeTenantLooking(@Param('number') number: string) {
+    return this.apartmentsService.changeTenantLooking(+number)
+  }
+
+  @Patch('rental-info/:number')
+  rentalInfo(@Param('number') number: string, @Body() updateRentalInfo) {
+    return this.apartmentsService.rentalInfo(+number, updateRentalInfo)
   }
 
   @Patch(':number')

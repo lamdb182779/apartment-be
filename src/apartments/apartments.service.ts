@@ -5,12 +5,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Apartment } from './entities/apartment.entity';
 import { Between, Repository } from 'typeorm';
 import { addMonths, isBefore, setDate, startOfMonth, subDays, subMonths } from 'date-fns';
+import { Room } from 'src/rooms/entities/room.entity';
 
 @Injectable()
 export class ApartmentsService {
   constructor(
     @InjectRepository(Apartment)
-    private apartmentsRepository: Repository<Apartment>
+    private apartmentsRepository: Repository<Apartment>,
+
+    @InjectRepository(Room)
+    private roomsRepository: Repository<Room>
   ) { }
   create(createApartmentDto: CreateApartmentDto) {
     return 'This action adds a new apartment';
@@ -71,6 +75,7 @@ export class ApartmentsService {
       .getMany()
     return apartments.map(({ updatedAt, createdAt, ...apartment }) => apartment)
   }
+
   async findOwnered(floor?: number) {
     const query = this.apartmentsRepository
       .createQueryBuilder('apartment')
@@ -94,6 +99,15 @@ export class ApartmentsService {
       relations: ["owner"]
     })
     return apartment.owner.name
+  }
+  async tenantLooking() {
+    const rentalaApt = await this.apartmentsRepository.find({
+      where: {
+        tenantLooking: true
+      },
+      relations: ["rooms", "owner"]
+    })
+    return rentalaApt
   }
 
   async findNearest(number: number, time: string) {
@@ -128,6 +142,58 @@ export class ApartmentsService {
 
   update(number: number, updateApartmentDto: UpdateApartmentDto) {
     return `This action updates a #${number} apartment`;
+  }
+
+  async rentalInfo(number: number, updateRentalInfo) {
+    const { adTitle, rentPrice, advertisement, image, rooms } = updateRentalInfo
+    if (!number || isNaN(number)) throw new BadRequestException("Không rõ số căn hộ!")
+    const apartment = await this.apartmentsRepository.findOne({ where: { number }, relations: ["rooms"] })
+    if (!apartment) throw new Error('Không tìm thấy căn hộ này!')
+    const roomErrors = []
+    const errors = []
+    for (const room of rooms) {
+      if (room.id && apartment.rooms.some(item => item.id === room.id)) {
+        const { id, ...rest } = room
+        const updateRoom = await this.roomsRepository.update(id, rest)
+        if (updateRoom.affected === 0) roomErrors.push("change")
+      }
+      else {
+        const newRoom = await this.roomsRepository.save({
+          image: room.image,
+          name: room.name,
+          type: room.type,
+          acreage: room.acreage
+        })
+        if (newRoom) {
+          newRoom.apartment = apartment
+          await this.roomsRepository.save(newRoom)
+        } else roomErrors.push("add")
+      }
+    }
+    for (const room of apartment.rooms) {
+      if (!rooms.some(item => item.id === room.id)) {
+        const del = await this.roomsRepository.delete(room.id)
+        if (del.affected === 0) roomErrors.push("delete")
+      }
+    }
+    const update = await this.apartmentsRepository.update(number, {
+      adTitle, image, rentPrice, advertisement
+    })
+    if (roomErrors.includes("add")) errors.push("Lỗi khi thêm một số phòng!")
+    if (roomErrors.includes("change")) errors.push("Lỗi khi sửa một số phòng!")
+    if (roomErrors.includes("delete")) errors.push("Lỗi khi xóa một số phòng!")
+    if (update.affected === 0) errors.push("Không thể cập nhật thông tin tổng quan!")
+    if (errors.length > 0) throw new BadRequestException(errors)
+    return { message: "Cập nhật thành công" }
+  }
+
+  async changeTenantLooking(number: number) {
+    if (!number || isNaN(number)) throw new BadRequestException("Không rõ số căn hộ!")
+    const apartment = await this.apartmentsRepository.findOneBy({ number })
+    if (!apartment) throw new Error('Không tìm thấy căn hộ này!')
+    const update = await this.apartmentsRepository.update(number, { tenantLooking: !apartment.tenantLooking })
+    if (update.affected === 0) throw new BadRequestException("Đổi trạng thái trạng thái của căn hộ thất bại!")
+    return { message: "Đổi trạng thái thành công" }
   }
 
   remove(number: number) {
