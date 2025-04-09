@@ -1,4 +1,5 @@
 import { Apartment } from 'src/apartments/entities/apartment.entity';
+import { NotificationRead } from 'src/notifications/entities/notification.entity';
 import { Vehicle } from 'src/vehicles/entities/vehicle.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, BeforeUpdate, OneToMany } from 'typeorm';
 
@@ -46,6 +47,9 @@ export class Resident {
 
     @OneToMany(() => Vehicle, vehicle => vehicle.resident, { onDelete: "CASCADE" })
     vehicles: Vehicle[]
+
+    @OneToMany(() => NotificationRead, reads => reads.resident)
+    reads: NotificationRead[]
 
     @CreateDateColumn()
     createdAt: Date

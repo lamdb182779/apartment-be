@@ -2,11 +2,12 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Notification, NotificationApartment } from './entities/notification.entity';
-import { In, Repository } from 'typeorm';
+import { Notification, NotificationRead } from './entities/notification.entity';
+import { In, IsNull, Not, Repository } from 'typeorm';
 import { Apartment } from 'src/apartments/entities/apartment.entity';
 import { roles } from 'src/helpers/utils';
 import { Resident } from 'src/residents/entities/resident.entity';
+import { intersection } from 'lodash'
 
 @Injectable()
 export class NotificationsService {
@@ -14,8 +15,8 @@ export class NotificationsService {
     @InjectRepository(Notification)
     private notificationsRepository: Repository<Notification>,
 
-    @InjectRepository(NotificationApartment)
-    private notificationApartmentsRepository: Repository<NotificationApartment>,
+    @InjectRepository(NotificationRead)
+    private notificationReadsRepository: Repository<NotificationRead>,
 
     @InjectRepository(Apartment)
     private apartmentsRepository: Repository<Apartment>,
@@ -25,24 +26,45 @@ export class NotificationsService {
   ) { }
   async create(createNotificationDto: CreateNotificationDto) {
     const { apartments, content, title, describe } = createNotificationDto
+    const ownedApartments = await this.apartmentsRepository.find({
+      where: {
+        owner: Not(IsNull())
+      }
+    })
+    const notiOwnedApartments = intersection(ownedApartments.map(apt => apt.number), apartments)
     const notification = await this.notificationsRepository.save({
       content,
       title,
       describe
     })
+    const ownerIdsList = []
     if (notification) {
-      const apartmentPromises = apartments.map(async (number) => {
+      const apartmentPromises = notiOwnedApartments.map(async (number) => {
         const apartment = await this.apartmentsRepository.findOne({
           where: {
             number,
-          }
+          },
+          relations: ["owner", "residents"]
         });
 
         if (apartment) {
-          await this.notificationApartmentsRepository.save({
-            apartment,
-            notification
-          });
+          if (apartment.owner && !ownerIdsList.includes(apartment.owner.id)) {
+            await this.notificationReadsRepository.save({
+              owner: apartment.owner,
+              notification
+            }).then(() => {
+              ownerIdsList.push(apartment.owner.id)
+            })
+          }
+          if (apartment.residents?.length > 0) {
+            const residentPromises = apartment.residents.map(async (resident) => {
+              await this.notificationReadsRepository.save({
+                resident: resident,
+                notification
+              })
+            })
+            await Promise.all(residentPromises)
+          }
         }
       });
 
@@ -55,14 +77,14 @@ export class NotificationsService {
     current = (current && current > 0) ? current : 1
     pageSize = (pageSize && pageSize > 0) ? pageSize : 10
 
-    const [apartments, count] = await this.notificationsRepository.findAndCount({
+    const [notifications, count] = await this.notificationsRepository.findAndCount({
       take: pageSize,
       skip: (current - 1) * pageSize,
       order: {
         createdAt: "ASC"
       }
     })
-    return { results: apartments, totalPages: Math.ceil(count / pageSize) }
+    return { results: notifications, totalPages: Math.ceil(count / pageSize) }
   }
 
   async findAllByUser(current: number, pageSize: number, user: any) {
@@ -72,19 +94,10 @@ export class NotificationsService {
     const key = Object.keys(roles).find(key => roles[key] === role)
     switch (key) {
       case "owner": {
-        const apartments = await this.apartmentsRepository.find({
-          relations: ["owner"],
-          where: { owner: { id: user.id } },
-          select: ["number"],
-        })
-
-        const apartmentNumbers = apartments.map(apartment => apartment.number)
-        const [notifications, count] = await this.notificationsRepository.findAndCount({
-          relations: ['apartments'],
+        const [notificationreads, count] = await this.notificationReadsRepository.findAndCount({
+          relations: ['owner', 'notification'],
           where: {
-            apartments: {
-              apartment: { number: In(apartmentNumbers) },
-            },
+            owner: { id: user.id }
           },
           order: {
             createdAt: 'DESC',
@@ -93,22 +106,15 @@ export class NotificationsService {
         })
 
         return {
-          results: notifications.map(({ apartments, content, ...notification }) => { return { ...notification, isRead: apartments.some(({ isOwnerRead }) => isOwnerRead === true) } }),
+          results: notificationreads.map(({ notification, isRead }) => { return { ...notification, isRead } }),
           totalPages: Math.ceil(count / pageSize)
         }
       }
       case "resident": {
-        const resident = await this.residentsRepository.findOne({
-          where: user,
-          relations: ["apartment"],
-        })
-        const apartmentNumber = resident.apartment.number
-        const [notifications, count] = await this.notificationsRepository.findAndCount({
-          relations: ['apartments'],
+        const [notificationreads, count] = await this.notificationReadsRepository.findAndCount({
+          relations: ['resident', 'notification'],
           where: {
-            apartments: {
-              apartment: { number: apartmentNumber },
-            },
+            resident: { id: user.id }
           },
           order: {
             createdAt: 'DESC',
@@ -116,7 +122,7 @@ export class NotificationsService {
           take: pageSize,
         })
         return {
-          results: notifications.map(({ apartments, content, ...notification }) => { return { ...notification, isRead: apartments.some(({ isRead }) => isRead === true) } }),
+          results: notificationreads.map(({ notification, isRead }) => { return { ...notification, isRead } }),
           totalPages: Math.ceil(count / pageSize)
         }
       }
@@ -130,41 +136,24 @@ export class NotificationsService {
 
     switch (key) {
       case "owner": {
-        const apartments = await this.apartmentsRepository.find({
-          relations: ["owner"],
-          where: { owner: { id: user.id } },
-          select: ["number"],
-        })
-
-        const apartmentNumbers = apartments.map(apartment => apartment.number)
-        const notification = await this.notificationsRepository.findOne({
+        const notificationread = await this.notificationReadsRepository.findOne({
           where: {
-            id,
-            apartments: {
-              apartment: {
-                number: In(apartmentNumbers)
-              }
-            }
+            notification: { id: id },
+            owner: { id: user.id }
           },
-          relations: ["apartments"]
+          relations: ["owner", "notification"]
         })
-        return notification;
+        return notificationread.notification;
       }
       case "resident": {
-        const resident = await this.residentsRepository.findOne({
-          where: user,
-          relations: ["apartment"],
-        })
-        const apartmentNumber = resident.apartment.number
-        const notification = await this.notificationsRepository.findOne({
-          relations: ['apartments'],
+        const notificationread = await this.notificationReadsRepository.findOne({
+          relations: ['notification', 'resident'],
           where: {
-            apartments: {
-              apartment: { number: apartmentNumber },
-            },
+            notification: { id: id },
+            resident: { id: user.id }
           },
         })
-        return notification
+        return notificationread.notification
       }
       default: throw new BadRequestException("Vai trò người dùng không phù hợp!")
     }
@@ -175,38 +164,26 @@ export class NotificationsService {
     const key = Object.keys(roles).find(key => roles[key] === role)
     switch (key) {
       case "owner": {
-        const apartments = await this.apartmentsRepository.find({
-          relations: ["owner"],
-          where: { owner: { id: user.id } },
-          select: ["number"],
-        })
-
-        const apartmentNumbers = apartments.map(apartment => apartment.number)
-        const update = await this.notificationApartmentsRepository.update({
+        const update = await this.notificationReadsRepository.update({
           notification: {
             id
           },
-          apartment: {
-            number: In(apartmentNumbers)
+          owner: {
+            id: user.id
           }
         },
-          { isOwnerRead: true }
+          { isRead: true }
         )
         if (update.affected === 0) throw new BadRequestException("Thông báo không phù hợp đánh dấu đã đọc!")
         return { message: "Đánh dấu thông báo đã đọc" }
       }
       case "resident": {
-        const resident = await this.residentsRepository.findOne({
-          where: user,
-          relations: ["apartment"],
-        })
-        const apartmentNumber = resident.apartment.number
-        const update = await this.notificationApartmentsRepository.update({
+        const update = await this.notificationReadsRepository.update({
           notification: {
             id
           },
-          apartment: {
-            number: apartmentNumber
+          resident: {
+            id: user.id
           }
         },
           { isRead: true }
@@ -223,31 +200,19 @@ export class NotificationsService {
     const key = Object.keys(roles).find(key => roles[key] === role)
     switch (key) {
       case "owner": {
-        const apartments = await this.apartmentsRepository.find({
-          relations: ["owner"],
-          where: { owner: { id: user.id } },
-          select: ["number"],
-        })
-
-        const apartmentNumbers = apartments.map(apartment => apartment.number)
-        const update = await this.notificationApartmentsRepository.update({
-          apartment: {
-            number: In(apartmentNumbers)
+        const update = await this.notificationReadsRepository.update({
+          owner: {
+            id: user.id
           }
         },
-          { isOwnerRead: true }
+          { isRead: true }
         )
         return { message: "Đánh dấu tất cả là đã đọc" }
       }
       case "resident": {
-        const resident = await this.residentsRepository.findOne({
-          where: user,
-          relations: ["apartment"],
-        })
-        const apartmentNumber = resident.apartment.number
-        const update = await this.notificationApartmentsRepository.update({
-          apartment: {
-            number: apartmentNumber
+        const update = await this.notificationReadsRepository.update({
+          resident: {
+            id: user.id
           }
         },
           { isRead: true }

@@ -1,4 +1,5 @@
 import { Apartment } from 'src/apartments/entities/apartment.entity';
+import { NotificationRead } from 'src/notifications/entities/notification.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
@@ -41,6 +42,9 @@ export class Owner {
 
     @OneToMany(() => Apartment, apartment => apartment.owner, { onDelete: "SET NULL" })
     apartments: Apartment[]
+
+    @OneToMany(() => NotificationRead, reads => reads.owner)
+    reads: NotificationRead[]
 
     @CreateDateColumn()
     createdAt: Date

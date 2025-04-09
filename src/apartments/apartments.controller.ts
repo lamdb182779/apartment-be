@@ -3,6 +3,7 @@ import { ApartmentsService } from './apartments.service';
 import { CreateApartmentDto } from './dto/create-apartment.dto';
 import { UpdateApartmentDto } from './dto/update-apartment.dto';
 import { query } from 'express';
+import { Public } from 'src/helpers/decorators';
 
 @Controller('apartments')
 export class ApartmentsController {
@@ -39,9 +40,16 @@ export class ApartmentsController {
     return this.apartmentsService.checkOwnered(+number)
   }
 
+  @Public()
   @Get('tenant-looking')
   tenantLooking() {
     return this.apartmentsService.tenantLooking()
+  }
+
+  @Public()
+  @Get('tenant-looking/:number')
+  tenantLookingNumber(@Param('number') number: string) {
+    return this.apartmentsService.tenantLookingNumber(+number)
   }
 
   @Get('nearest')

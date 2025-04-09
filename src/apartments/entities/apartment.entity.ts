@@ -1,5 +1,4 @@
 import { Bill } from 'src/bills/entities/bill.entity';
-import { NotificationApartment } from 'src/notifications/entities/notification.entity';
 import { Owner } from 'src/owners/entities/owner.entity';
 import { Parameter } from 'src/parameters/entities/parameter.entity';
 import { Room } from 'src/rooms/entities/room.entity';
@@ -72,9 +71,6 @@ export class Apartment {
 
     @OneToMany(() => Room, room => room.apartment, { onDelete: "CASCADE" })
     rooms: Room[]
-
-    @OneToMany(() => NotificationApartment, notification => notification.apartment)
-    notifications: NotificationApartment[];
 
     @CreateDateColumn()
     createdAt: Date

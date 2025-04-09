@@ -100,10 +100,23 @@ export class ApartmentsService {
     })
     return apartment.owner.name
   }
+
   async tenantLooking() {
     const rentalaApt = await this.apartmentsRepository.find({
       where: {
         tenantLooking: true
+      },
+      relations: ["rooms", "owner"]
+    })
+    return rentalaApt
+  }
+
+  async tenantLookingNumber(number: number) {
+    if (!number || isNaN(number)) throw new BadRequestException("Không rõ số nhà!")
+    const rentalaApt = await this.apartmentsRepository.findOne({
+      where: {
+        tenantLooking: true,
+        number
       },
       relations: ["rooms", "owner"]
     })
