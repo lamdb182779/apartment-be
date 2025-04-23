@@ -135,25 +135,11 @@ export class NotificationsService {
     const key = Object.keys(roles).find(key => roles[key] === role)
 
     switch (key) {
-      case "owner": {
-        const notificationread = await this.notificationReadsRepository.findOne({
-          where: {
-            notification: { id: id },
-            owner: { id: user.id }
-          },
-          relations: ["owner", "notification"]
+      case "receptionist": {
+        const notification = await this.notificationsRepository.findOne({
+          where: { id },
         })
-        return notificationread.notification;
-      }
-      case "resident": {
-        const notificationread = await this.notificationReadsRepository.findOne({
-          relations: ['notification', 'resident'],
-          where: {
-            notification: { id: id },
-            resident: { id: user.id }
-          },
-        })
-        return notificationread.notification
+        return notification;
       }
       default: throw new BadRequestException("Vai trò người dùng không phù hợp!")
     }

@@ -73,7 +73,7 @@ export class BillsService {
           active: true
         }
       },
-      relations: ["owner", "bills"]
+      relations: ["owner", "bills"],
     })
     if (apartments?.length === 0) throw new BadRequestException("Không tìm được chủ hộ đang hoạt động với mã số này!")
     return apartments.map(({ number, bills, ...apartment }) => { return { number, bills } });

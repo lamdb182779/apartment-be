@@ -29,11 +29,22 @@ export class ServicesService {
     return { message: 'Tạo yêu cầu thành công' };
   }
 
-  findAll() {
-    return `This action returns all services`;
+  async findAll(current: number, pageSize: number) {
+    current = (current && current > 0) ? current : 1
+    pageSize = (pageSize && pageSize > 0) ? pageSize : 10
+
+    const [services, count] = await this.servicesRepository.findAndCount({
+      take: pageSize,
+      skip: (current - 1) * pageSize,
+      order: {
+        createdAt: "ASC"
+      },
+      relations: ["apartment"],
+    })
+    return { results: services, totalPages: Math.ceil(count / pageSize) }
   }
 
-  async findAllByApartment(user: any) {
+  async findAllBySelf(user: any) {
     const role = user.role
     const key = Object.keys(roles).find(key => roles[key] === role)
     switch (key) {
@@ -44,15 +55,18 @@ export class ServicesService {
           select: ["number"],
         })
         const apartmentNumbers = apartments.map(apartment => apartment.number)
-        const services = this.servicesRepository.find({
+        const services = await this.servicesRepository.find({
           where: {
             apartment: {
               number: In(apartmentNumbers)
             }
           },
-          relations: ["apartment"]
+          relations: ["apartment"],
+          order: {
+            createdAt: "DESC"
+          }
         })
-        return services
+        return services.map(({ apartment, ...rest }) => { return { ...rest, apartment: apartment.number } })
       }
       case "resident": {
         const resident = await this.residentsRepository.findOne({
@@ -60,15 +74,18 @@ export class ServicesService {
           relations: ["apartment"],
         })
         const apartmentNumber = resident.apartment.number
-        const services = this.servicesRepository.find({
+        const services = await this.servicesRepository.find({
           where: {
             apartment: {
               number: apartmentNumber
             }
           },
-          relations: ["apartment"]
+          relations: ["apartment"],
+          order: {
+            createdAt: "DESC"
+          }
         })
-        return services
+        return services.map(({ apartment, ...rest }) => { return { ...rest, apartment: apartment.number } })
       }
       default: throw new BadRequestException("Vai trò người dùng không phù hợp!")
     }
@@ -84,10 +101,10 @@ export class ServicesService {
     return service;
   }
 
-  async status(id: string, status: string) {
+  async status(id: string, status: "Chờ xác nhận" | "Chấp thuận" | "Từ chối" | "Đã hủy", reason: string) {
     const service = await this.servicesRepository.update({
       id
-    }, { status })
+    }, { status, rejectReason: reason })
 
     return { message: "Cập nhật thành công" };
   }

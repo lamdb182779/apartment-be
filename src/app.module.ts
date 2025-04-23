@@ -25,6 +25,8 @@ import { RegentsModule } from './regents/regents.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { VehiclesModule } from './vehicles/vehicles.module';
 import { PaymentsModule } from './payments/payments.module';
+import { SamplesModule } from './samples/samples.module';
+import { CommentsModule } from './comments/comments.module';
 
 @Module({
   imports: [
@@ -99,6 +101,8 @@ import { PaymentsModule } from './payments/payments.module';
     RoomsModule,
     VehiclesModule,
     PaymentsModule,
+    SamplesModule,
+    CommentsModule,
   ],
   controllers: [AppController],
   providers: [

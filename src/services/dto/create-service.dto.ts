@@ -1,4 +1,5 @@
-import { IsInt, IsNotEmpty, IsString, ValidateIf } from "class-validator";
+
+import { IsInt, IsNotEmpty, IsOptional, IsString, ValidateIf } from "class-validator";
 
 export class CreateServiceDto {
 
@@ -16,7 +17,7 @@ export class CreateServiceDto {
     @IsString({ message: "Khu vực phải là một chuỗi văn bản!" })
     area: string;
 
-    @ValidateIf((o) => o.phone !== null && o.phone !== undefined && o.phone !== '')
+    @IsOptional()
     @IsString({ message: "Mô tả phải là một chuỗi văn bản!" })
     reason: string;
 

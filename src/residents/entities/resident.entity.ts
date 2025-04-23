@@ -1,4 +1,5 @@
 import { Apartment } from 'src/apartments/entities/apartment.entity';
+import { Comment } from 'src/comments/entities/comment.entity';
 import { NotificationRead } from 'src/notifications/entities/notification.entity';
 import { Vehicle } from 'src/vehicles/entities/vehicle.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, BeforeUpdate, OneToMany } from 'typeorm';
@@ -48,8 +49,11 @@ export class Resident {
     @OneToMany(() => Vehicle, vehicle => vehicle.resident, { onDelete: "CASCADE" })
     vehicles: Vehicle[]
 
-    @OneToMany(() => NotificationRead, reads => reads.resident)
+    @OneToMany(() => NotificationRead, reads => reads.resident, { onDelete: "CASCADE" })
     reads: NotificationRead[]
+
+    @OneToMany(() => Comment, comment => comment.resident, { onDelete: "SET NULL" })
+    comments: Comment[]
 
     @CreateDateColumn()
     createdAt: Date

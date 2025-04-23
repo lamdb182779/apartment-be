@@ -13,13 +13,14 @@ export class ServicesController {
   }
 
   @Get()
-  findAll() {
-    return this.servicesService.findAll();
+  findAll(@Query() query: Record<string, string>) {
+    const { current, pageSize } = query
+    return this.servicesService.findAll(+current, +pageSize);
   }
 
   @Get("self")
   findAllByApartment(@Request() req) {
-    return this.servicesService.findAllByApartment(req.user);
+    return this.servicesService.findAllBySelf(req.user);
   }
 
   @Get(':id')
@@ -29,7 +30,7 @@ export class ServicesController {
 
   @Patch('status')
   status(@Body() body) {
-    return this.servicesService.status(body.id, body.status);
+    return this.servicesService.status(body.id, body.status, body.reason);
   }
 
   @Patch(':id')

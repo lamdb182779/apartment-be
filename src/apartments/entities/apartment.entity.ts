@@ -6,6 +6,7 @@ import { Service } from 'src/services/entities/service.entity';
 import { Resident } from 'src/residents/entities/resident.entity';
 import { Visitor } from 'src/visitors/entities/visitor.entity';
 import { Entity, Column, PrimaryColumn, OneToMany, ManyToOne, CreateDateColumn, UpdateDateColumn, BeforeUpdate } from 'typeorm';
+import { Payment } from 'src/payments/entities/payment.entity';
 
 @Entity()
 export class Apartment {
@@ -68,6 +69,9 @@ export class Apartment {
 
     @OneToMany(() => Bill, bill => bill.apartment, { onDelete: "CASCADE" })
     bills: Bill[]
+
+    @OneToMany(() => Payment, payment => payment.apartment, { onDelete: "SET NULL" })
+    payments: Payment[]
 
     @OneToMany(() => Room, room => room.apartment, { onDelete: "CASCADE" })
     rooms: Room[]

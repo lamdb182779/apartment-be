@@ -24,7 +24,7 @@ export class OwnersService {
     let username: string
     let hash: string
     while (!isUnique) {
-      username = generateUsername(createOwnerDto.name)
+      username = generateUsername(name)
       const existingUser = await this.ownersRepository.findOne({ where: { username } })
       if (!existingUser) {
         isUnique = true
@@ -57,13 +57,16 @@ export class OwnersService {
     }
   }
 
-  async findAll(filter: Record<string, string>, current: number, pageSize: number, orderBy: string) {
+  async findAll(filter: Record<string, string>, current: number, pageSize: number, orderBy: string, active: string) {
     current = (current && current > 0) ? current : 1
     pageSize = (pageSize && pageSize > 0) ? pageSize : 10
     orderBy = (orderBy === "DESC") ? orderBy : "ASC"
 
     const [owners, count] = await this.ownersRepository.findAndCount({
-      where: transformFilterToILike(filter),
+      where: {
+        ...transformFilterToILike(filter),
+        active: active === "false" ? false : true
+      },
       take: pageSize,
       skip: (current - 1) * pageSize,
       order: {
@@ -105,8 +108,28 @@ export class OwnersService {
     return { ...owner, apartments: owner.apartments.map(({ updatedAt, createdAt, ...apartment }) => apartment) }
   }
 
+  async deactive(id: string) {
+    const update = await this.ownersRepository.update(id, {
+      active: false
+    })
+    if (update.affected === 0) throw new BadRequestException(["Không thể ngừng hoạt động chủ hộ với mã số này!"])
+    return ({ message: "Ngừng hoạt động thành công" })
+  }
+  async reactive(id: string) {
+    const update = await this.ownersRepository.update(id, {
+      active: true
+    })
+    if (update.affected === 0) throw new BadRequestException(["Không thể ngừng hoạt động chủ hộ với mã số này!"])
+    return ({ message: "Khôi phục thành công" })
+  }
+
   async update(id: string, updateOwnerDto: UpdateOwnerDto) {
-    const owner = await this.ownersRepository.findOneBy({ id: id })
+    const owner = await this.ownersRepository.findOne({
+      where: {
+        id
+      },
+      relations: ["apartments"]
+    })
     if (!owner) throw new NotFoundException([`Không tìm thấy chủ hộ mã số ${id}!`])
     const { name, image, email, phone, apartments } = updateOwnerDto
     if (email !== owner.email) {
@@ -116,12 +139,14 @@ export class OwnersService {
     const numberErrors = []
     const errors = []
     for (const number of apartments) {
-      const apartment = await this.apartmentsRepository.createQueryBuilder()
-        .update(Apartment)
-        .set({ owner })
-        .where('number = :number AND owner IS NULL', { number })
-        .execute()
-      if (apartment.affected === 0) numberErrors.push(number)
+      if (!owner.apartments.map(apartment => apartment.number).includes(number)) {
+        const apartment = await this.apartmentsRepository.createQueryBuilder()
+          .update(Apartment)
+          .set({ owner })
+          .where('number = :number AND owner IS NULL', { number })
+          .execute()
+        if (apartment.affected === 0) numberErrors.push(number)
+      }
     }
     if (numberErrors.length > 0) errors.push(`Không thể thêm quyền sở hữu căn hộ ${numberErrors.join(", ")}!`)
     const update = await this.ownersRepository.update(id, {

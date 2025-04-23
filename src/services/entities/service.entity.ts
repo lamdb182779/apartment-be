@@ -19,13 +19,16 @@ export class Service {
     area: string;
 
     @Column({ default: "Chờ xác nhận" })
-    status: string;
+    status: "Chờ xác nhận" | "Chấp thuận" | "Từ chối" | "Đã hủy";
 
     @Column({ default: false })
     isComplete: boolean;
 
     @Column({ nullable: true })
     reason: string;
+
+    @Column({ nullable: true })
+    rejectReason: string;
 
     @ManyToOne(() => Apartment, apartment => apartment.services)
     apartment: Apartment

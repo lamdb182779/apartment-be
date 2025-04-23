@@ -17,7 +17,7 @@ export class ParametersService {
   ) { }
   async create() {
     const types = ["electric", "water"]
-    const month = new Date("2024-12-25")
+    const month = new Date("2025-3-25")
     const apartments = await this.apartmentsRepository
       .createQueryBuilder('apartment')
       .where(`apartment.owner IS NOT NULL`)

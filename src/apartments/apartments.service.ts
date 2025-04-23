@@ -3,7 +3,7 @@ import { CreateApartmentDto } from './dto/create-apartment.dto';
 import { UpdateApartmentDto } from './dto/update-apartment.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Apartment } from './entities/apartment.entity';
-import { Between, Repository } from 'typeorm';
+import { Between, IsNull, Not, Repository } from 'typeorm';
 import { addMonths, isBefore, setDate, startOfMonth, subDays, subMonths } from 'date-fns';
 import { Room } from 'src/rooms/entities/room.entity';
 
@@ -49,6 +49,7 @@ export class ApartmentsService {
         number,
         parameters: {
           month: Between(subMonths(now, 6), now),
+          value: Not(IsNull())
         },
       },
       relations: ["parameters", "residents", "rooms"]

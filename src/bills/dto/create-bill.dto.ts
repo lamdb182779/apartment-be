@@ -1,4 +1,5 @@
-import { IsInt, IsNotEmpty, IsNumber, IsString, IsUUID, ValidateIf } from "class-validator";
+
+import { IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, ValidateIf } from "class-validator";
 
 export class CreateBillDto {
     @IsNotEmpty({ message: "Nội dung khôg được để trống!" })
@@ -8,15 +9,15 @@ export class CreateBillDto {
     @IsNumber({}, { message: "Số tiền phải là một số!" })
     amount: number
 
-    @ValidateIf((o) => o.phone !== null && o.phone !== undefined && o.phone !== '')
+    @IsOptional()
     @IsString({ message: "Loại hóa đơn phải là một chuỗi văn bản!" })
     type: string;
 
-    @ValidateIf((o) => o.phone !== null && o.phone !== undefined && o.phone !== '')
+    @IsOptional()
     @IsString({ message: "Tiêu đề phải là một chuỗi văn bản!" })
     title: string;
 
-    @ValidateIf((o) => o.phone !== null && o.phone !== undefined && o.phone !== '')
+    @ValidateIf((o) => o.id !== null && o.id !== undefined && o.id !== '')
     @IsUUID(undefined, { message: "Mã hóa đơn không đúng định dạng!" })
     id: string
 

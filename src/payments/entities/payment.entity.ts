@@ -1,36 +1,28 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Apartment } from 'src/apartments/entities/apartment.entity';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne } from 'typeorm';
 
 @Entity('payments')
 export class Payment {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column({ type: 'varchar', length: 50, nullable: false })
+    @Column()
     orderId: string;
 
-    @Column({ type: 'varchar', length: 50, nullable: true })
-    transactionId: string;
-
-    @Column({ type: 'decimal', precision: 12, scale: 2, nullable: false })
+    @Column()
     amount: number;
 
-    @Column({ type: 'varchar', length: 50, nullable: false })
-    paymentMethod: string;
+    @Column({ default: 'pending' })
+    status: 'pending' | 'success' | 'failed';
 
-    @Column({ type: 'varchar', length: 10, nullable: true })
+    @Column({ nullable: true })
     bankCode: string;
 
-    @Column({ type: 'timestamp', nullable: false })
-    transactionDate: Date;
+    @Column({ nullable: true })
+    transactionNo: string;
 
-    @Column({ type: 'varchar', length: 20, nullable: false })
-    status: string;
-
-    @Column({ type: 'varchar', length: 5, nullable: false })
-    language: string;
-
-    @Column({ type: 'varchar', length: 255, nullable: true })
-    message: string;
+    @ManyToOne(() => Apartment, apartment => apartment.payments, { nullable: true })
+    apartment: Apartment
 
     @CreateDateColumn()
     createdAt: Date;

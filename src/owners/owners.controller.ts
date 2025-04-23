@@ -15,8 +15,8 @@ export class OwnersController {
 
   @Get()
   findAll(@Query() query: Record<string, string>) {
-    const { current, pageSize, orderBy, ...filter } = query
-    return this.ownersService.findAll(filter, +current, +pageSize, orderBy);
+    const { current, pageSize, orderBy, active, ...filter } = query
+    return this.ownersService.findAll(filter, +current, +pageSize, orderBy, active);
   }
 
   @Get('apartments')
@@ -27,6 +27,16 @@ export class OwnersController {
   @Get('account')
   findSelfAccount() {
     return this.ownersService.findSelfAccount();
+  }
+
+  @Patch('deactive/:id')
+  deactive(@Param() param: IdParamDto) {
+    return this.ownersService.deactive(param.id)
+  }
+
+  @Patch('reactive/:id')
+  reactive(@Param() param: IdParamDto) {
+    return this.ownersService.reactive(param.id)
   }
 
   @Patch(':id')

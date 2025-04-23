@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestj
 import { ResidentsService } from './residents.service';
 import { CreateResidentDto } from './dto/create-resident.dto';
 import { UpdateResidentDto } from './dto/update-resident.dto';
+import { IdParamDto } from 'src/helpers/utils';
 
 @Controller('residents')
 export class ResidentsController {
@@ -14,8 +15,8 @@ export class ResidentsController {
 
   @Get()
   findAll(@Query() query: Record<string, string>) {
-    const { current, pageSize, orderBy, ...filter } = query
-    return this.residentsService.findAll(filter, +current, +pageSize, orderBy);
+    const { current, pageSize, orderBy, active, ...filter } = query
+    return this.residentsService.findAll(filter, +current, +pageSize, orderBy, active);
   }
 
   @Get(':id')
@@ -24,8 +25,8 @@ export class ResidentsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateResidentDto: UpdateResidentDto) {
-    return this.residentsService.update(id, updateResidentDto);
+  update(@Param() param: IdParamDto, @Body() updateResidentDto: UpdateResidentDto) {
+    return this.residentsService.update(param.id, updateResidentDto);
   }
 
   @Delete(':id')

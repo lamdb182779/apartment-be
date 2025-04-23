@@ -1,9 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateResidentDto } from './dto/create-resident.dto';
 import { UpdateResidentDto } from './dto/update-resident.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Resident } from './entities/resident.entity';
-import { Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 import { Apartment } from 'src/apartments/entities/apartment.entity';
 import { generateUsername, hashPassword, transformFilterToILike } from 'src/helpers/utils';
 import { add } from 'date-fns';
@@ -52,13 +52,16 @@ export class ResidentsService {
     }
   }
 
-  async findAll(filter: Record<string, string>, current: number, pageSize: number, orderBy: string) {
+  async findAll(filter: Record<string, string>, current: number, pageSize: number, orderBy: string, active: string) {
     current = (current && current > 0) ? current : 1
     pageSize = (pageSize && pageSize > 0) ? pageSize : 10
     orderBy = (orderBy === "DESC") ? orderBy : "ASC"
 
     const [residents, count] = await this.residentsRepository.findAndCount({
-      where: transformFilterToILike(filter),
+      where: {
+        ...transformFilterToILike(filter),
+        active: active === "false" ? false : true
+      },
       take: pageSize,
       skip: (current - 1) * pageSize,
       order: {
@@ -73,8 +76,32 @@ export class ResidentsService {
     return `This action returns a #${id} resident`;
   }
 
-  update(id: string, updateResidentDto: UpdateResidentDto) {
-    return `This action updates a #${id} resident`;
+  async update(id: string, updateResidentDto: UpdateResidentDto) {
+    const resident = await this.residentsRepository.findOne({
+      where: {
+        id
+      },
+      relations: ["apartment"]
+    })
+    if (!resident) throw new NotFoundException([`Không tìm thấy chủ hộ mã số ${id}!`])
+    const { name, image, email, phone, number } = updateResidentDto
+    if (email !== resident.email) {
+      const existingEmail = await this.residentsRepository.findOne({ where: { email } })
+      if (existingEmail) throw new BadRequestException([`Email ${email} đã tồn tại, vui lòng kiểm tra lại!`])
+    }
+    const update = await this.residentsRepository.update(id, {
+      name, image, email, phone
+    })
+    const apt = await this.apartmentsRepository.findOne({
+      where: {
+        number,
+        owner: Not(IsNull()),
+      }
+    })
+    if (!apt) throw new NotFoundException(["Không thấy căn hộ với mã số này!"])
+    resident.apartment = apt
+    await this.residentsRepository.save(resident)
+    return { message: "Cập nhật thành công" }
   }
 
   remove(id: string) {
