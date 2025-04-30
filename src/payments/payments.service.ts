@@ -22,8 +22,25 @@ export class PaymentsService {
 
     private config: ConfigService
   ) { }
+  verifyVnpaySignature(query: any): boolean {
+    const vnp_HashSecret = this.config.get<string>('VNP_HASH_SECRET');
+    const vnp_SecureHash = query.vnp_SecureHash;
+    delete query.vnp_SecureHash;
+    delete query.vnp_SecureHashType;
 
-  createPaymentUrl(orderId: string, amount: number, req): string {
+    const sortedQuery = sortObject(query);;
+
+    const signData = qs.stringify(sortedQuery, { encode: false });
+    const hash = crypto
+      .createHmac('sha512', vnp_HashSecret)
+      .update(Buffer.from(signData, 'utf8'))
+      .digest('hex');
+
+    return hash === vnp_SecureHash;
+  }
+
+
+  createPaymentUrl(orderId: string, amount: number, req, id: string): string {
     const vnp_TmnCode = this.config.get<string>('VNP_TMN_CODE');
     const vnp_HashSecret = this.config.get<string>('VNP_HASH_SECRET');
     const vnp_Url = this.config.get<string>('VNP_URL');
@@ -32,21 +49,22 @@ export class PaymentsService {
     const createDate = format(new Date(), 'yyyyMMddHHmmss')
     const expiredDate = format(add(new Date(), { minutes: 15 }), 'yyyyMMddHHmmss')
 
-    const ipAddr = req.headers['x-forwarded-for'] ||
-      req.connection.remoteAddress ||
-      req.socket.remoteAddress ||
-      req.connection.socket.remoteAddress ||
+    const ipAddr =
+      // req.headers['x-forwarded-for'] ||
+      // req.connection.remoteAddress ||
+      // req.socket.remoteAddress ||
+      // req.connection.socket.remoteAddress ||
       "127.0.0.1";
 
     const params = {
-      vnp_Version: '2.1.0',
+      vnp_Version: '2.1.1',
       vnp_Command: 'pay',
       vnp_TmnCode,
       vnp_Locale: 'vn',
       vnp_CurrCode: 'VND',
-      vnp_TxnRef: `${createDate}-${orderId}`,
+      vnp_TxnRef: id,
       vnp_OrderInfo: `Thanh toan don hang ${orderId}`,
-      vnp_OrderType: 'other',
+      vnp_OrderType: 'billpayment',
       vnp_Amount: amount * 100,
       vnp_ReturnUrl,
       vnp_IpAddr: ipAddr,
@@ -74,12 +92,28 @@ export class PaymentsService {
     })
     if (!bill) throw new BadRequestException("Không tìm thấy hóa đơn chưa thanh toán này!")
     const amount = bill.amount
-    const url = this.createPaymentUrl(orderId, amount, req);
-    await this.paymentsRepository.save({
+    const payment = await this.paymentsRepository.save({
       orderId,
       amount,
     });
-    return { url }
+    const url = this.createPaymentUrl(orderId, amount, req, payment.id);
+    return { url, message: "Đang chuyển hướng trang thanh toán" }
+  }
+
+  async updateOrderStatus(txnRef: string, status: 'success' | 'failed', res) {
+    const payment = await this.paymentsRepository.findOneBy({ id: txnRef })
+    if (payment) {
+      if (status === 'success') {
+        const bill = await this.billsRepository.update(payment.orderId, { isPaid: true })
+        if (bill.affected === 0) console.log(`Không thể cập nhật trạng thái thanh toán hóa đơn ${txnRef}!`)
+        else console.log(`Cập nhật trạng thái thanh toán hóa đơn ${txnRef} thành công`)
+      }
+      const update = await this.paymentsRepository.update(txnRef, { status })
+      if (update.affected === 0) console.log(`Không thể cập nhật trạng thái thanh toán ${txnRef} thành ${status}!`)
+      else console.log(`Cập nhật trạng thái thanh toán ${txnRef} thành ${status} thành công`);
+      return res.redirect(`http://localhost:3000/customer/bills/?status=${status}&billId=${payment.id}`);
+    }
+    else console.log("Không tìm thấy mã thanh toán tương ứng!")
   }
 
   findAll() {

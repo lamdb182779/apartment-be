@@ -84,11 +84,17 @@ export class OwnersService {
           id,
         },
       },
-      relations: ["owner", "residents", "rooms"]
+      relations: ["owner", "residents", "rooms", "bills"]
     })
-    return apartments.map(({ createdAt, updatedAt, owner, residents, rooms, ...apartment }) => {
+    return apartments.map(({ createdAt, updatedAt, owner, residents, rooms, bills, ...apartment }) => {
       return {
-        ...apartment, residents: residents.map(({ name, active }) => active ? name : null).filter(Boolean), rooms: rooms.map(({ type }) => type)
+        ...apartment,
+        residents: residents.map(({ name, active }) => active ? name : null).filter(Boolean),
+        rooms: rooms.map(({ type }) => type),
+        debt: bills.reduce((acc: number, bill) => {
+          if (bill.isPaid) return acc
+          return bill.amount - 0 + acc
+        }, 0)
       }
     })
   }
