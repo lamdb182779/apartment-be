@@ -3,16 +3,19 @@ import { ResidentsService } from './residents.service';
 import { CreateResidentDto } from './dto/create-resident.dto';
 import { UpdateResidentDto } from './dto/update-resident.dto';
 import { IdParamDto } from 'src/helpers/utils';
+import { Roles } from 'src/helpers/decorators';
 
 @Controller('residents')
 export class ResidentsController {
   constructor(private readonly residentsService: ResidentsService) { }
 
+  @Roles("manager", "receptionist")
   @Post()
   create(@Body() createResidentDto: CreateResidentDto) {
     return this.residentsService.create(createResidentDto);
   }
 
+  @Roles("manager", "receptionist")
   @Get()
   findAll(@Query() query: Record<string, string>) {
     const { current, pageSize, orderBy, active, ...filter } = query

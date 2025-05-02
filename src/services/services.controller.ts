@@ -2,11 +2,13 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Request } fro
 import { ServicesService } from './services.service';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
+import { Roles } from 'src/helpers/decorators';
 
 @Controller('services')
 export class ServicesController {
   constructor(private readonly servicesService: ServicesService) { }
 
+  @Roles("owner", "resident")
   @Post()
   create(@Body() createServiceDto: CreateServiceDto) {
     return this.servicesService.create(createServiceDto);
@@ -18,6 +20,7 @@ export class ServicesController {
     return this.servicesService.findAll(+current, +pageSize);
   }
 
+  @Roles("owner", "resident")
   @Get("self")
   findAllByApartment(@Request() req) {
     return this.servicesService.findAllBySelf(req.user);

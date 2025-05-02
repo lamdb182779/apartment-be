@@ -2,16 +2,19 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestj
 import { VisitorsService } from './visitors.service';
 import { CreateVisitorDto } from './dto/create-visitor.dto';
 import { UpdateVisitorDto } from './dto/update-visitor.dto';
+import { Roles } from 'src/helpers/decorators';
 
 @Controller('visitors')
 export class VisitorsController {
   constructor(private readonly visitorsService: VisitorsService) { }
 
+  @Roles("manager", "receptionist")
   @Post()
   create(@Body() createVisitorDto: CreateVisitorDto) {
     return this.visitorsService.create(createVisitorDto);
   }
 
+  @Roles("manager", "receptionist")
   @Get()
   findAll(@Query() query) {
     return this.visitorsService.findAll(query);

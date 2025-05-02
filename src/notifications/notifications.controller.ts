@@ -29,16 +29,19 @@ export class NotificationsController {
     return this.notificationsService.findAllByUser(+current, +pageSize, user);
   }
 
+  @Roles("manager", "receptionist")
   @Get(':id')
-  findOne(@Param('id') id: string, @Request() req) {
-    return this.notificationsService.findOne(id, req.user);
+  findOne(@Param('id') id: string) {
+    return this.notificationsService.findOne(id);
   }
 
+  @Roles("owner", "resident")
   @Patch("readed")
   updateReaded(@Body() body, @Request() req) {
     return this.notificationsService.updateReaded(body.id, req.user)
   }
 
+  @Roles("owner", "resident")
   @Patch("readedall")
   updateReadedAll(@Request() req) {
     return this.notificationsService.updateReadedAll(req.user)
@@ -49,6 +52,7 @@ export class NotificationsController {
     return this.notificationsService.update(id, updateNotificationDto);
   }
 
+  @Roles("manager", "receptionist")
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.notificationsService.remove(id);

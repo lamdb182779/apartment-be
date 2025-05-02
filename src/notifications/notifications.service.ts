@@ -130,19 +130,11 @@ export class NotificationsService {
     }
   }
 
-  async findOne(id: string, user: any) {
-    const role = user.role
-    const key = Object.keys(roles).find(key => roles[key] === role)
-
-    switch (key) {
-      case "receptionist": {
-        const notification = await this.notificationsRepository.findOne({
-          where: { id },
-        })
-        return notification;
-      }
-      default: throw new BadRequestException("Vai trò người dùng không phù hợp!")
-    }
+  async findOne(id: string) {
+    const notification = await this.notificationsRepository.findOne({
+      where: { id },
+    })
+    return notification;
   }
 
   async updateReaded(id: string, user: any) {

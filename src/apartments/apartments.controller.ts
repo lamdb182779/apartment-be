@@ -3,7 +3,7 @@ import { ApartmentsService } from './apartments.service';
 import { CreateApartmentDto } from './dto/create-apartment.dto';
 import { UpdateApartmentDto } from './dto/update-apartment.dto';
 import { query } from 'express';
-import { Public } from 'src/helpers/decorators';
+import { Public, Roles } from 'src/helpers/decorators';
 
 @Controller('apartments')
 export class ApartmentsController {
@@ -63,11 +63,13 @@ export class ApartmentsController {
     return this.apartmentsService.findOne(+number);
   }
 
+  @Roles("owner")
   @Patch('change-tenant-looking/:number')
   changeTenantLooking(@Param('number') number: string) {
     return this.apartmentsService.changeTenantLooking(+number)
   }
 
+  @Roles("owner")
   @Patch('rental-info/:number')
   rentalInfo(@Param('number') number: string, @Body() updateRentalInfo) {
     return this.apartmentsService.rentalInfo(+number, updateRentalInfo)
