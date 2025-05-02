@@ -213,7 +213,9 @@ export class NotificationsService {
     return `This action updates a #${id} notification`;
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} notification`;
+  async remove(id: string) {
+    const del = await this.notificationsRepository.delete(id)
+    if (del.affected === 0) throw new BadRequestException(["Không thể xóa thông báo với mã số này!"])
+    return { message: "Xóa thông báo thành công" };
   }
 }

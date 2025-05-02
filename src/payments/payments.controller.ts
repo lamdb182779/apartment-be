@@ -28,7 +28,7 @@ export class PaymentsController {
 
       if (!verified) {
         this.logger.warn('Chữ ký sai từ VNPAY');
-        return res.redirect(`http://localhost:3000/customer/bills?status=error&msg=invalid_signature`)
+        return res.redirect(`http://localhost:3000/customer/bills?status=error`)
       }
 
       const { vnp_ResponseCode, vnp_TxnRef } = query;

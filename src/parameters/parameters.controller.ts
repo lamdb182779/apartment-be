@@ -24,8 +24,8 @@ export class ParametersController {
   }
 
   @Patch(':id')
-  update(@Param() param: IdParamDto, @Body() updateParameterDto: UpdateParameterDto, @Request() req) {
-    return this.parametersService.update(param.id, updateParameterDto, req.user);
+  update(@Param() param: IdParamDto, @Body() updateParameterDto: UpdateParameterDto) {
+    return this.parametersService.update(param.id, updateParameterDto);
   }
 
   @Delete(':id')

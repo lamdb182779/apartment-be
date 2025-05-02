@@ -67,7 +67,7 @@ export class ParametersService {
     return `This action returns a #${id} parameter`;
   }
 
-  async update(id: string, updateParameterDto: UpdateParameterDto, technician: any) {
+  async update(id: string, updateParameterDto: UpdateParameterDto) {
     const { value } = updateParameterDto
     const parameter = await this.parametersRepository.findOne({
       where: {
@@ -84,7 +84,6 @@ export class ParametersService {
     })
     if (preMonthPara?.value > value) throw new BadRequestException(`Chỉ số tháng trước là ${preMonthPara.value}, không thể nhập thấp hơn!`)
     parameter.value = value
-    parameter.technician = technician
     await this.parametersRepository.save(parameter)
     return { message: "Cập nhật chỉ số thành công" };
   }
