@@ -16,11 +16,8 @@ export class Parameter {
     @Column({ nullable: true })
     value: number;
 
-    @ManyToOne(() => Apartment, apartment => apartment.parameters)
+    @ManyToOne(() => Apartment, apartment => apartment.parameters, { onDelete: "CASCADE" })
     apartment: Apartment
-
-    @ManyToOne(() => Technician, technician => technician.parameters, { nullable: true })
-    technician: Technician
 
     @CreateDateColumn()
     createdAt: Date

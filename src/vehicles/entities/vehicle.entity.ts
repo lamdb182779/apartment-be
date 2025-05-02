@@ -15,7 +15,7 @@ export class Vehicle {
     @Column()
     image: string;
 
-    @ManyToOne(() => Resident, resident => resident.vehicles)
+    @ManyToOne(() => Resident, resident => resident.vehicles, { onDelete: "CASCADE" })
     resident: Resident
 
     @CreateDateColumn()

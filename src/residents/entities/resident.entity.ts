@@ -42,17 +42,17 @@ export class Resident {
     @Column({ nullable: true })
     expiredAt: Date;
 
-    @ManyToOne(() => Apartment, apartment => apartment.residents, { nullable: true })
+    @ManyToOne(() => Apartment, apartment => apartment.residents, { nullable: true, onDelete: "SET NULL" })
     @JoinColumn()
     apartment: Apartment
 
-    @OneToMany(() => Vehicle, vehicle => vehicle.resident, { onDelete: "CASCADE" })
+    @OneToMany(() => Vehicle, vehicle => vehicle.resident)
     vehicles: Vehicle[]
 
-    @OneToMany(() => NotificationRead, reads => reads.resident, { onDelete: "CASCADE" })
+    @OneToMany(() => NotificationRead, reads => reads.resident)
     reads: NotificationRead[]
 
-    @OneToMany(() => Comment, comment => comment.resident, { onDelete: "SET NULL" })
+    @OneToMany(() => Comment, comment => comment.resident)
     comments: Comment[]
 
     @CreateDateColumn()

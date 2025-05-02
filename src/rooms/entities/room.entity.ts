@@ -18,7 +18,7 @@ export class Room {
     @Column("decimal")
     acreage: number;
 
-    @ManyToOne(() => Apartment, apartment => apartment.rooms)
+    @ManyToOne(() => Apartment, apartment => apartment.rooms, { onDelete: "CASCADE" })
     apartment: Apartment
 
     @CreateDateColumn()

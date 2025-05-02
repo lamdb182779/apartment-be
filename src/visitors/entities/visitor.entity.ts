@@ -18,7 +18,7 @@ export class Visitor {
     @Column({ nullable: true })
     image: string;
 
-    @ManyToOne(() => Apartment, apartment => apartment.visitors)
+    @ManyToOne(() => Apartment, apartment => apartment.visitors, { nullable: true, onDelete: "SET NULL" })
     apartment: Apartment;
 
     @CreateDateColumn()

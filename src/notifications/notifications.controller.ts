@@ -2,22 +2,26 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Request } fro
 import { NotificationsService } from './notifications.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
+import { Roles } from 'src/helpers/decorators';
 
 @Controller('notifications')
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) { }
 
+  @Roles("manager", "receptionist")
   @Post()
   create(@Body() createNotificationDto: CreateNotificationDto) {
     return this.notificationsService.create(createNotificationDto);
   }
 
+  @Roles("manager", "receptionist")
   @Get()
   findAll(@Query() query: Record<string, string>) {
     const { current, pageSize } = query
     return this.notificationsService.findAll(+current, +pageSize);
   }
 
+  @Roles("owner", "resident")
   @Get("self")
   findAllByUser(@Query() query: Record<string, string>, @Request() req) {
     const { current, pageSize } = query

@@ -143,6 +143,7 @@ export class OwnersService {
       if (existingEmail) throw new BadRequestException([`Email ${email} đã tồn tại, vui lòng kiểm tra lại!`])
     }
     const numberErrors = []
+    const numErrs = []
     const errors = []
     for (const number of apartments) {
       if (!owner.apartments.map(apartment => apartment.number).includes(number)) {
@@ -154,7 +155,18 @@ export class OwnersService {
         if (apartment.affected === 0) numberErrors.push(number)
       }
     }
+    for (const number of owner.apartments.map(apartment => apartment.number)) {
+      if (!apartments.includes(number)) {
+        const apartment = await this.apartmentsRepository.createQueryBuilder()
+          .update(Apartment)
+          .set({ owner: null })
+          .where('number = :number', { number })
+          .execute()
+        if (apartment.affected === 0) numErrs.push(number)
+      }
+    }
     if (numberErrors.length > 0) errors.push(`Không thể thêm quyền sở hữu căn hộ ${numberErrors.join(", ")}!`)
+    if (numErrs.length > 0) errors.push(`Không thể loại bỏ quyền sở hữu căn hộ ${numberErrors.join(", ")}!`)
     const update = await this.ownersRepository.update(id, {
       name, image, email, phone
     })

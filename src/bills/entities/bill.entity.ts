@@ -26,10 +26,7 @@ export class Bill {
     @Column()
     expired: Date;
 
-    @ManyToOne(() => Accountant, accountant => accountant.bills, { nullable: true })
-    accountant: Accountant
-
-    @ManyToOne(() => Apartment, apartment => apartment.bills)
+    @ManyToOne(() => Apartment, apartment => apartment.bills, { onDelete: "CASCADE" })
     apartment: Apartment
 
     @CreateDateColumn()

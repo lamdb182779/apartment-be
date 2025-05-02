@@ -14,10 +14,13 @@ export class Comment {
     @Column()
     description: string;
 
-    @ManyToOne(() => Owner, owner => owner.comments, { nullable: true })
+    @Column()
+    image: string;
+
+    @ManyToOne(() => Owner, owner => owner.comments, { nullable: true, onDelete: "SET NULL" })
     owner: Owner;
 
-    @ManyToOne(() => Resident, resident => resident.comments, { nullable: true })
+    @ManyToOne(() => Resident, resident => resident.comments, { nullable: true, onDelete: "SET NULL" })
     resident: Resident;
 
     @CreateDateColumn()

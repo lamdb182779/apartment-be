@@ -41,13 +41,13 @@ export class Owner {
     @Column({ nullable: true })
     expiredAt: Date;
 
-    @OneToMany(() => Apartment, apartment => apartment.owner, { onDelete: "SET NULL" })
+    @OneToMany(() => Apartment, apartment => apartment.owner)
     apartments: Apartment[]
 
-    @OneToMany(() => NotificationRead, reads => reads.owner, { onDelete: "CASCADE" })
+    @OneToMany(() => NotificationRead, reads => reads.owner)
     reads: NotificationRead[]
 
-    @OneToMany(() => Comment, comment => comment.owner, { onDelete: "SET NULL" })
+    @OneToMany(() => Comment, comment => comment.owner)
     comments: Comment[]
 
     @CreateDateColumn()

@@ -30,9 +30,6 @@ export class Receptionist {
     @Column({ select: false })
     password: string;
 
-    @OneToMany(() => Notification, notification => notification.receptionist, { onDelete: "SET NULL" })
-    notifications: Notification[]
-
     @CreateDateColumn()
     createdAt: Date
 

@@ -52,28 +52,28 @@ export class Apartment {
     @Column({ nullable: true })
     image: string;
 
-    @ManyToOne(() => Owner, owner => owner.apartments, { nullable: true })
+    @ManyToOne(() => Owner, owner => owner.apartments, { nullable: true, onDelete: "SET NULL" })
     owner: Owner
 
-    @OneToMany(() => Parameter, parameter => parameter.apartment, { onDelete: "CASCADE" })
+    @OneToMany(() => Parameter, parameter => parameter.apartment)
     parameters: Parameter[]
 
-    @OneToMany(() => Resident, resident => resident.apartment, { onDelete: "SET NULL" })
+    @OneToMany(() => Resident, resident => resident.apartment)
     residents: Resident[]
 
-    @OneToMany(() => Visitor, visitor => visitor.apartment, { onDelete: "SET NULL" })
+    @OneToMany(() => Visitor, visitor => visitor.apartment)
     visitors: Visitor[]
 
-    @OneToMany(() => Service, service => service.apartment, { onDelete: "SET NULL" })
+    @OneToMany(() => Service, service => service.apartment)
     services: Service[]
 
-    @OneToMany(() => Bill, bill => bill.apartment, { onDelete: "CASCADE" })
+    @OneToMany(() => Bill, bill => bill.apartment)
     bills: Bill[]
 
-    @OneToMany(() => Payment, payment => payment.apartment, { onDelete: "SET NULL" })
+    @OneToMany(() => Payment, payment => payment.apartment)
     payments: Payment[]
 
-    @OneToMany(() => Room, room => room.apartment, { onDelete: "CASCADE" })
+    @OneToMany(() => Room, room => room.apartment)
     rooms: Room[]
 
     @CreateDateColumn()

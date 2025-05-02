@@ -2,10 +2,10 @@
 import { IsArray, IsInt, IsNotEmpty, IsOptional, IsString, ValidateIf } from "class-validator";
 
 export class CreateNotificationDto {
-    @IsNotEmpty({ message: "Nội dung khôg được để trống!" })
+    @IsNotEmpty({ message: "Nội dung không được để trống!" })
     content: any[]
 
-    @IsOptional()
+    @IsNotEmpty({ message: "Tiêu đề không được để trống!" })
     @IsString({ message: "Tiêu đề phải là một chuỗi văn bản!" })
     title: string;
 

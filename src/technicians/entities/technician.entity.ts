@@ -30,9 +30,6 @@ export class Technician {
     @Column({ select: false })
     password: string;
 
-    @OneToMany(() => Parameter, parameter => parameter.technician, { onDelete: "SET NULL" })
-    parameters: Parameter[]
-
     @CreateDateColumn()
     createdAt: Date
 

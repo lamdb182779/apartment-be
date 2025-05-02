@@ -1,4 +1,3 @@
-import { Bill } from 'src/bills/entities/bill.entity';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
@@ -29,9 +28,6 @@ export class Accountant {
 
     @Column({ select: false })
     password: string;
-
-    @OneToMany(() => Bill, bill => bill.accountant, { onDelete: "SET NULL" })
-    bills: Bill[]
 
     @CreateDateColumn()
     createdAt: Date

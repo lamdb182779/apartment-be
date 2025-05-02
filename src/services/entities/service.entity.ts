@@ -30,7 +30,7 @@ export class Service {
     @Column({ nullable: true })
     rejectReason: string;
 
-    @ManyToOne(() => Apartment, apartment => apartment.services)
+    @ManyToOne(() => Apartment, apartment => apartment.services, { nullable: true, onDelete: "SET NULL" })
     apartment: Apartment
 
     @CreateDateColumn()

@@ -18,10 +18,7 @@ export class Notification {
     @Column("simple-json")
     content: any[];
 
-    @ManyToOne(() => Receptionist, receptionist => receptionist.notifications, { nullable: true })
-    receptionist: Receptionist
-
-    @OneToMany(() => NotificationRead, reads => reads.notification, { onDelete: 'CASCADE' })
+    @OneToMany(() => NotificationRead, reads => reads.notification)
     reads: NotificationRead[]
 
     @CreateDateColumn()
@@ -37,13 +34,13 @@ export class NotificationRead {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @ManyToOne(() => Notification, notification => notification.reads)
+    @ManyToOne(() => Notification, notification => notification.reads, { onDelete: "CASCADE" })
     notification: Notification;
 
-    @ManyToOne(() => Owner, owner => owner.reads, { nullable: true })
+    @ManyToOne(() => Owner, owner => owner.reads, { nullable: true, onDelete: "CASCADE" })
     owner: Owner;
 
-    @ManyToOne(() => Resident, resident => resident.reads, { nullable: true })
+    @ManyToOne(() => Resident, resident => resident.reads, { nullable: true, onDelete: "CASCADE" })
     resident: Resident;
 
     @Column({ default: false })

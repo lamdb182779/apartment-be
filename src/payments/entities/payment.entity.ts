@@ -21,7 +21,7 @@ export class Payment {
     @Column({ nullable: true })
     transactionNo: string;
 
-    @ManyToOne(() => Apartment, apartment => apartment.payments, { nullable: true })
+    @ManyToOne(() => Apartment, apartment => apartment.payments, { nullable: true, onDelete: "SET NULL" })
     apartment: Apartment
 
     @CreateDateColumn()
