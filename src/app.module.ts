@@ -20,7 +20,7 @@ import { VisitorsModule } from './visitors/visitors.module';
 import { ServicesModule } from './services/services.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ReceptionistsModule } from './receptionists/receptionists.module';
-import { DirectorsModule } from './directors/directors.module';
+import { ManagersModule } from './managers/managers.module';
 import { RegentsModule } from './regents/regents.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { VehiclesModule } from './vehicles/vehicles.module';
@@ -32,7 +32,7 @@ import { Resident } from './residents/entities/resident.entity';
 import { Accountant } from './accountants/entities/accountant.entity';
 import { Receptionist } from './receptionists/entities/receptionist.entity';
 import { Technician } from './technicians/entities/technician.entity';
-import { Director } from './directors/entities/director.entity';
+import { Manager } from './managers/entities/manager.entity';
 import { Regent } from './regents/entities/regent.entity';
 
 @Module({
@@ -64,7 +64,7 @@ import { Regent } from './regents/entities/regent.entity';
         return dataSource;
       },
     }),
-    TypeOrmModule.forFeature([Owner, Resident, Accountant, Receptionist, Technician, Director, Regent]),
+    TypeOrmModule.forFeature([Owner, Resident, Accountant, Receptionist, Technician, Manager, Regent]),
     AccountantsModule,
     ParametersModule,
     ApartmentsModule,
@@ -76,7 +76,7 @@ import { Regent } from './regents/entities/regent.entity';
     ServicesModule,
     NotificationsModule,
     ReceptionistsModule,
-    DirectorsModule,
+    ManagersModule,
     RegentsModule,
     AuthModule,
     MailerModule.forRootAsync({

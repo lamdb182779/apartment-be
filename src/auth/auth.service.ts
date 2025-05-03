@@ -10,7 +10,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { add, isAfter, isBefore } from 'date-fns';
 import { Receptionist } from 'src/receptionists/entities/receptionist.entity';
 import { Technician } from 'src/technicians/entities/technician.entity';
-import { Director } from 'src/directors/entities/director.entity';
+import { Manager } from 'src/managers/entities/manager.entity';
 import { Regent } from 'src/regents/entities/regent.entity';
 
 @Injectable()
@@ -28,8 +28,8 @@ export class AuthService {
         @InjectRepository(Technician)
         private techniciansRepository: Repository<Technician>,
 
-        @InjectRepository(Director)
-        private directorsRepository: Repository<Director>,
+        @InjectRepository(Manager)
+        private managersRepository: Repository<Manager>,
 
         @InjectRepository(Regent)
         private regentsRepository: Repository<Regent>,
@@ -131,18 +131,18 @@ export class AuthService {
                 const { password, ...result } = regent
                 return result
             }
-            case "director": {
-                const director = await this.directorsRepository.findOne({
+            case "manager": {
+                const manager = await this.managersRepository.findOne({
                     where: {
                         username: username,
                         active: true
                     },
                     select: ['id', 'username', 'email', 'password', "active", "image", "name", "phone", "role"],
                 })
-                if (!director) throw new UnauthorizedException("Không tìm thấy trưởng ban quản lý đang hoạt động với tài khoản này, vui lòng kiểm tra lại!")
-                const compare = await comparePassword(plainPassword, director.password)
+                if (!manager) throw new UnauthorizedException("Không tìm thấy trưởng ban quản lý đang hoạt động với tài khoản này, vui lòng kiểm tra lại!")
+                const compare = await comparePassword(plainPassword, manager.password)
                 if (!compare) throw new UnauthorizedException("Sai mật khẩu, vui lòng kiểm tra lại!")
-                const { password, ...result } = director
+                const { password, ...result } = manager
                 return result
             }
             default: throw new BadRequestException("Không tìm thấy mã vai trò tương ứng!")
@@ -386,19 +386,19 @@ export class AuthService {
                     message: "Đổi mật khẩu thành công",
                 }
             }
-            case "director": {
-                const director = await this.directorsRepository.findOne({
+            case "manager": {
+                const manager = await this.managersRepository.findOne({
                     where: {
                         id: user.id,
                         active: true
                     },
                     select: ['password'],
                 })
-                if (!director) throw new BadRequestException("Không tìm thấy trưởng ban quản lý đang hoạt động với mã số này, vui lòng kiểm tra lại!")
-                const compare = await comparePassword(currentPassword, director.password)
+                if (!manager) throw new BadRequestException("Không tìm thấy trưởng ban quản lý đang hoạt động với mã số này, vui lòng kiểm tra lại!")
+                const compare = await comparePassword(currentPassword, manager.password)
                 if (!compare) throw new UnauthorizedException("Sai mật khẩu, vui lòng kiểm tra lại!")
                 const hash = await hashPassword(newPassword)
-                const update = await this.directorsRepository.update(user.id, { password: hash })
+                const update = await this.managersRepository.update(user.id, { password: hash })
                 if (update.affected === 0) throw new BadRequestException("Lỗi khi cập nhật mật khẩu!")
                 return {
                     message: "Đổi mật khẩu thành công",

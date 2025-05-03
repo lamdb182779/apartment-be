@@ -9,7 +9,7 @@ import { Repository } from 'typeorm';
 import { Accountant } from 'src/accountants/entities/accountant.entity';
 import { Receptionist } from 'src/receptionists/entities/receptionist.entity';
 import { Technician } from 'src/technicians/entities/technician.entity';
-import { Director } from 'src/directors/entities/director.entity';
+import { Manager } from 'src/managers/entities/manager.entity';
 import { Regent } from 'src/regents/entities/regent.entity';
 import { Resident } from 'src/residents/entities/resident.entity';
 import { roles } from 'src/helpers/utils';
@@ -31,8 +31,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     @InjectRepository(Technician)
     private techniciansRepository: Repository<Technician>,
 
-    @InjectRepository(Director)
-    private directorsRepository: Repository<Director>,
+    @InjectRepository(Manager)
+    private managersRepository: Repository<Manager>,
 
     @InjectRepository(Regent)
     private regentsRepository: Repository<Regent>,
@@ -100,13 +100,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         if (!regent) throw new UnauthorizedException("Không tìm thấy thành viên ban quản trị đang hoạt động với tài khoản này, vui lòng kiểm tra lại!")
         return regent
       }
-      case "director": {
-        const director = await this.directorsRepository.findOneBy({
+      case "manager": {
+        const manager = await this.managersRepository.findOneBy({
           id,
           active: true
         })
-        if (!director) throw new UnauthorizedException("Không tìm thấy trưởng ban quản lý đang hoạt động với tài khoản này, vui lòng kiểm tra lại!")
-        return director
+        if (!manager) throw new UnauthorizedException("Không tìm thấy trưởng ban quản lý đang hoạt động với tài khoản này, vui lòng kiểm tra lại!")
+        return manager
       }
       default: throw new BadRequestException("Không tìm thấy mã vai trò tương ứng!")
     }

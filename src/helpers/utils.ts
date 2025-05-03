@@ -95,7 +95,7 @@ export const roles = {
     accountant: 22,
     owner: 31,
     resident: 32,
-    director: 12,
+    manager: 12,
     regent: 11,
     technician: 23,
     receptionist: 21

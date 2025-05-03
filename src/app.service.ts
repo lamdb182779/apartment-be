@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Resident } from './residents/entities/resident.entity';
 import { Regent } from './regents/entities/regent.entity';
-import { Director } from './directors/entities/director.entity';
+import { Manager } from './managers/entities/manager.entity';
 import { Technician } from './technicians/entities/technician.entity';
 import { Receptionist } from './receptionists/entities/receptionist.entity';
 import { Accountant } from './accountants/entities/accountant.entity';
@@ -24,8 +24,8 @@ export class AppService {
     @InjectRepository(Technician)
     private techniciansRepository: Repository<Technician>,
 
-    @InjectRepository(Director)
-    private directorsRepository: Repository<Director>,
+    @InjectRepository(Manager)
+    private managersRepository: Repository<Manager>,
 
     @InjectRepository(Regent)
     private regentsRepository: Repository<Regent>,

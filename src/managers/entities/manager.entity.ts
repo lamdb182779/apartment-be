@@ -1,7 +1,7 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()
-export class Director {
+export class Manager {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
