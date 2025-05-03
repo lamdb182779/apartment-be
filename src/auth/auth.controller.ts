@@ -32,9 +32,14 @@ export class AuthController {
         return this.authService.verifyEmail(id, +role, otp)
     }
 
-    @Patch("change")
-    async changePassword(@Body() body: { id: string, role: string, newPassword: string, currentPassword: string }) {
-        const { id, role, newPassword, currentPassword } = body
-        return this.authService.changePassword(id, +role, newPassword, currentPassword)
+    @Patch("changePw")
+    async changePassword(@Body() body: { newPassword: string, currentPassword: string }, @Request() req) {
+        const { newPassword, currentPassword } = body
+        return this.authService.changePassword(req.user, newPassword, currentPassword)
+    }
+
+    @Patch("changeUn")
+    async changeUsername(@Body("newUsername") newUsername: string, @Request() req) {
+        return this.authService.changeUsername(req.user, newUsername)
     }
 }

@@ -292,14 +292,14 @@ export class AuthService {
         }
     }
 
-    async changePassword(id: string, role: number, newPassword: string, currentPassword: string) {
-        const key = Object.keys(roles).find(key => roles[key] === role)
+    async changePassword(user, newPassword: string, currentPassword: string) {
+        const key = Object.keys(roles).find(key => roles[key] === user.role)
         if (!key) throw new BadRequestException("Không tìm thấy mã vai trò tương ứng!")
         switch (key) {
             case "owner": {
                 const owner = await this.ownersRepository.findOne({
                     where: {
-                        id: id,
+                        id: user.id,
                         active: true
                     },
                     select: ['password'],
@@ -308,7 +308,7 @@ export class AuthService {
                 const compare = await comparePassword(currentPassword, owner.password)
                 if (!compare) throw new UnauthorizedException("Sai mật khẩu, vui lòng kiểm tra lại!")
                 const hash = await hashPassword(newPassword)
-                const update = await this.ownersRepository.update(id, { password: hash })
+                const update = await this.ownersRepository.update(user.id, { password: hash })
                 if (update.affected === 0) throw new BadRequestException("Lỗi khi cập nhật mật khẩu!")
                 return {
                     message: "Đổi mật khẩu thành công",
@@ -317,7 +317,7 @@ export class AuthService {
             case "resident": {
                 const resident = await this.residentsRepository.findOne({
                     where: {
-                        id: id,
+                        id: user.id,
                         active: true
                     },
                     select: ['password'],
@@ -326,7 +326,7 @@ export class AuthService {
                 const compare = await comparePassword(currentPassword, resident.password)
                 if (!compare) throw new UnauthorizedException("Sai mật khẩu, vui lòng kiểm tra lại!")
                 const hash = await hashPassword(newPassword)
-                const update = await this.residentsRepository.update(id, { password: hash })
+                const update = await this.residentsRepository.update(user.id, { password: hash })
                 if (update.affected === 0) throw new BadRequestException("Lỗi khi cập nhật mật khẩu!")
                 return {
                     message: "Đổi mật khẩu thành công",
@@ -335,7 +335,7 @@ export class AuthService {
             case "accountant": {
                 const accountant = await this.accountantsRepository.findOne({
                     where: {
-                        id: id,
+                        id: user.id,
                         active: true
                     },
                     select: ['password'],
@@ -344,7 +344,7 @@ export class AuthService {
                 const compare = await comparePassword(currentPassword, accountant.password)
                 if (!compare) throw new UnauthorizedException("Sai mật khẩu, vui lòng kiểm tra lại!")
                 const hash = await hashPassword(newPassword)
-                const update = await this.accountantsRepository.update(id, { password: hash })
+                const update = await this.accountantsRepository.update(user.id, { password: hash })
                 if (update.affected === 0) throw new BadRequestException("Lỗi khi cập nhật mật khẩu!")
                 return {
                     message: "Đổi mật khẩu thành công",
@@ -353,7 +353,7 @@ export class AuthService {
             case "technician": {
                 const technician = await this.techniciansRepository.findOne({
                     where: {
-                        id: id,
+                        id: user.id,
                         active: true
                     },
                     select: ['password'],
@@ -362,7 +362,7 @@ export class AuthService {
                 const compare = await comparePassword(currentPassword, technician.password)
                 if (!compare) throw new UnauthorizedException("Sai mật khẩu, vui lòng kiểm tra lại!")
                 const hash = await hashPassword(newPassword)
-                const update = await this.techniciansRepository.update(id, { password: hash })
+                const update = await this.techniciansRepository.update(user.id, { password: hash })
                 if (update.affected === 0) throw new BadRequestException("Lỗi khi cập nhật mật khẩu!")
                 return {
                     message: "Đổi mật khẩu thành công",
@@ -371,7 +371,7 @@ export class AuthService {
             case "receptionist": {
                 const receptionist = await this.receptionistsRepository.findOne({
                     where: {
-                        id: id,
+                        id: user.id,
                         active: true
                     },
                     select: ['password'],
@@ -380,7 +380,7 @@ export class AuthService {
                 const compare = await comparePassword(currentPassword, receptionist.password)
                 if (!compare) throw new UnauthorizedException("Sai mật khẩu, vui lòng kiểm tra lại!")
                 const hash = await hashPassword(newPassword)
-                const update = await this.receptionistsRepository.update(id, { password: hash })
+                const update = await this.receptionistsRepository.update(user.id, { password: hash })
                 if (update.affected === 0) throw new BadRequestException("Lỗi khi cập nhật mật khẩu!")
                 return {
                     message: "Đổi mật khẩu thành công",
@@ -389,7 +389,7 @@ export class AuthService {
             case "director": {
                 const director = await this.directorsRepository.findOne({
                     where: {
-                        id: id,
+                        id: user.id,
                         active: true
                     },
                     select: ['password'],
@@ -398,7 +398,7 @@ export class AuthService {
                 const compare = await comparePassword(currentPassword, director.password)
                 if (!compare) throw new UnauthorizedException("Sai mật khẩu, vui lòng kiểm tra lại!")
                 const hash = await hashPassword(newPassword)
-                const update = await this.directorsRepository.update(id, { password: hash })
+                const update = await this.directorsRepository.update(user.id, { password: hash })
                 if (update.affected === 0) throw new BadRequestException("Lỗi khi cập nhật mật khẩu!")
                 return {
                     message: "Đổi mật khẩu thành công",
@@ -407,7 +407,7 @@ export class AuthService {
             case "regent": {
                 const regent = await this.regentsRepository.findOne({
                     where: {
-                        id: id,
+                        id: user.id,
                         active: true
                     },
                     select: ['password'],
@@ -416,7 +416,7 @@ export class AuthService {
                 const compare = await comparePassword(currentPassword, regent.password)
                 if (!compare) throw new UnauthorizedException("Sai mật khẩu, vui lòng kiểm tra lại!")
                 const hash = await hashPassword(newPassword)
-                const update = await this.regentsRepository.update(id, { password: hash })
+                const update = await this.regentsRepository.update(user.id, { password: hash })
                 if (update.affected === 0) throw new BadRequestException("Lỗi khi cập nhật mật khẩu!")
                 return {
                     message: "Đổi mật khẩu thành công",
@@ -424,5 +424,19 @@ export class AuthService {
             }
             default: throw new BadRequestException("Không tìm thấy mã vai trò tương ứng!")
         }
+    }
+
+    async changeUsername(user, newUsername: string) {
+        const key = Object.keys(roles).find(key => roles[key] === user.role)
+        if (!key) throw new BadRequestException("Không tìm thấy mã vai trò tương ứng!")
+        const username = await this[`${key}sRepository`].findOne({
+            where: {
+                username: newUsername
+            }
+        })
+        if (username) throw new BadRequestException(["Tên tài khoản đã tồn tại, vui lòng lựa chọn tên khác!"])
+        const update = this[`${key}sRepository`].update(user.id, { username: newUsername })
+        if (update.affected === 0) throw new BadRequestException(["Không thể cập nhật tên tài khoản mới!"])
+        return { message: "Cập nhật tên tài khoản mới thành công" }
     }
 }

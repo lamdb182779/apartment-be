@@ -27,6 +27,13 @@ import { VehiclesModule } from './vehicles/vehicles.module';
 import { PaymentsModule } from './payments/payments.module';
 import { SamplesModule } from './samples/samples.module';
 import { CommentsModule } from './comments/comments.module';
+import { Owner } from './owners/entities/owner.entity';
+import { Resident } from './residents/entities/resident.entity';
+import { Accountant } from './accountants/entities/accountant.entity';
+import { Receptionist } from './receptionists/entities/receptionist.entity';
+import { Technician } from './technicians/entities/technician.entity';
+import { Director } from './directors/entities/director.entity';
+import { Regent } from './regents/entities/regent.entity';
 
 @Module({
   imports: [
@@ -57,6 +64,7 @@ import { CommentsModule } from './comments/comments.module';
         return dataSource;
       },
     }),
+    TypeOrmModule.forFeature([Owner, Resident, Accountant, Receptionist, Technician, Director, Regent]),
     AccountantsModule,
     ParametersModule,
     ApartmentsModule,

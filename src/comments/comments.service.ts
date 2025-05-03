@@ -27,18 +27,50 @@ export class CommentsService {
     switch (key) {
       case "owner": {
         comment.owner = user
+        await this.commentsRepository.save(comment)
         return { message: "Thêm đánh giá thành công" }
       }
       case "resident": {
         comment.resident = user
+        await this.commentsRepository.save(comment)
         return { message: "Thêm đánh giá thành công" }
       }
       default: throw new BadRequestException(["Vai trò người dùng không phù hợp!"])
     }
   }
 
-  findAll() {
-    return `This action returns all comments`;
+  async findAll(current: number, pageSize: number) {
+    current = (current && current > 0) ? current : 1
+    pageSize = (pageSize && pageSize > 0) ? pageSize : 10
+    const [cmt, count] = await this.commentsRepository.findAndCount({
+      take: pageSize,
+      skip: (current - 1) * pageSize,
+      order: {
+        createdAt: "ASC"
+      }
+    })
+    return { results: cmt, totalPages: Math.ceil(count / pageSize) }
+  }
+
+  async findSelfAll(current: number, pageSize: number, user) {
+    const role = user.role
+    const key = Object.keys(roles).find(key => roles[key] === role)
+    current = (current && current > 0) ? current : 1
+    pageSize = (pageSize && pageSize > 0) ? pageSize : 10
+
+    const [cmt, count] = await this.commentsRepository.findAndCount({
+      where: {
+        [key]: {
+          id: user.id
+        }
+      },
+      take: pageSize,
+      skip: (current - 1) * pageSize,
+      order: {
+        createdAt: "ASC"
+      }
+    })
+    return { results: cmt, totalPages: Math.ceil(count / pageSize) }
   }
 
   findOne(id: number) {

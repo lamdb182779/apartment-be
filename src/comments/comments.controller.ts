@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Query } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
@@ -14,8 +14,15 @@ export class CommentsController {
   }
 
   @Get()
-  findAll() {
-    return this.commentsService.findAll();
+  findAll(@Query() query: Record<string, string>) {
+    const { current, pageSize } = query
+    return this.commentsService.findAll(+current, +pageSize);
+  }
+
+  @Get("self")
+  findSelfAll(@Query() query: Record<string, string>, @Req() req: Request) {
+    const { current, pageSize } = query
+    return this.commentsService.findSelfAll(+current, +pageSize, req.user);
   }
 
   @Get(':id')

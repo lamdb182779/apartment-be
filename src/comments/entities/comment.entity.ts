@@ -2,7 +2,7 @@ import { Owner } from "src/owners/entities/owner.entity";
 import { Resident } from "src/residents/entities/resident.entity";
 import { Check, Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
-@Check(`("ownerId" IS NOT NULL AND "residentId" IS NULL) OR ("ownerId" IS NULL AND "residentId" IS NOT NULL)`)
+@Check(`("ownerId" IS NOT NULL AND "residentId" IS NULL) OR ("ownerId" IS NULL AND "residentId" IS NOT NULL) OR ("ownerId" IS NULL AND "residentId" IS NULL)`)
 @Entity()
 export class Comment {
     @PrimaryGeneratedColumn('uuid')
@@ -14,7 +14,7 @@ export class Comment {
     @Column()
     description: string;
 
-    @Column()
+    @Column({ nullable: true })
     image: string;
 
     @ManyToOne(() => Owner, owner => owner.comments, { nullable: true, onDelete: "SET NULL" })
