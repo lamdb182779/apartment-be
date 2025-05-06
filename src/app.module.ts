@@ -34,6 +34,7 @@ import { Receptionist } from './receptionists/entities/receptionist.entity';
 import { Technician } from './technicians/entities/technician.entity';
 import { Manager } from './managers/entities/manager.entity';
 import { Regent } from './regents/entities/regent.entity';
+import { RepliesModule } from './replies/replies.module';
 
 @Module({
   imports: [
@@ -111,6 +112,7 @@ import { Regent } from './regents/entities/regent.entity';
     PaymentsModule,
     SamplesModule,
     CommentsModule,
+    RepliesModule,
   ],
   controllers: [AppController],
   providers: [

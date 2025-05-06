@@ -22,8 +22,9 @@ export class ServicesController {
 
   @Roles("owner", "resident")
   @Get("self")
-  findAllByApartment(@Request() req) {
-    return this.servicesService.findAllBySelf(req.user);
+  findAllByApartment(@Request() req, @Query() query: Record<string, string>) {
+    const { current, pageSize } = query
+    return this.servicesService.findAllBySelf(req.user, +current, +pageSize);
   }
 
   @Get(':id')

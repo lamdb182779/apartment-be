@@ -50,7 +50,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: any) {
     const { role, id } = payload
     const key = Object.keys(roles).find(key => roles[key] === role)
-    if (!key) throw new BadRequestException("Không tìm thấy mã vai trò tương ứng!")
+    if (!key) throw new BadRequestException(["Không tìm thấy mã vai trò tương ứng!"])
     switch (key) {
       case "owner": {
         const owner = await this.ownersRepository.findOneBy({
@@ -108,7 +108,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         if (!manager) throw new UnauthorizedException("Không tìm thấy trưởng ban quản lý đang hoạt động với tài khoản này, vui lòng kiểm tra lại!")
         return manager
       }
-      default: throw new BadRequestException("Không tìm thấy mã vai trò tương ứng!")
+      default: throw new BadRequestException(["Không tìm thấy mã vai trò tương ứng!"])
     }
   }
 }

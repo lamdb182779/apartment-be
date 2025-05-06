@@ -29,6 +29,9 @@ export class Accountant {
     @Column({ select: false })
     password: string;
 
+    @Column({ nullable: true, select: false })
+    resetCode: string;
+
     @CreateDateColumn()
     createdAt: Date
 

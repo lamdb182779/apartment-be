@@ -6,6 +6,7 @@ import { Apartment } from 'src/apartments/entities/apartment.entity';
 import { Repository } from 'typeorm';
 import { Bill } from './entities/bill.entity';
 import { addDays, startOfDay } from 'date-fns';
+import { roles } from 'src/helpers/utils';
 
 @Injectable()
 export class BillsService {
@@ -63,6 +64,22 @@ export class BillsService {
     })
     if (!bill) throw new BadRequestException("Không tìm thấy mã hóa đơn này!")
     return bill;
+  }
+
+  async findSelfAll(id: string, role: number) {
+    const key = Object.keys(roles).find(key => roles[key] === role)
+    if (key !== "owner" && key !== "resident") throw new BadRequestException(["Không tìm thấy mã vai trò tương ứng!"])
+    const apartments = await this.apartmentsRepository.find({
+      where: {
+        [key === "owner" ? key : "residents"]: {
+          id,
+          active: true
+        }
+      },
+      relations: ["owner", "bills", "residents"],
+    })
+    if (apartments?.length === 0) throw new BadRequestException("Không tìm được chủ hộ đang hoạt động với mã số này!")
+    return apartments.map(({ number, bills, ...apartment }) => { return { number, bills } });
   }
 
   async findByOwner(id: string) {

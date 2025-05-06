@@ -29,6 +29,9 @@ export class Regent {
     @Column({ select: false })
     password: string;
 
+    @Column({ nullable: true, select: false })
+    resetCode: string;
+
     @CreateDateColumn()
     createdAt: Date
 

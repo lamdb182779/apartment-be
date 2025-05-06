@@ -35,8 +35,11 @@ export class Owner {
     @Column({ default: false })
     isVerify: boolean;
 
-    @Column({ nullable: true })
+    @Column({ nullable: true, select: false })
     verifyId: string;
+
+    @Column({ nullable: true, select: false })
+    resetCode: string;
 
     @Column({ nullable: true })
     expiredAt: Date;

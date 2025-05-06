@@ -12,6 +12,8 @@ import { Receptionist } from 'src/receptionists/entities/receptionist.entity';
 import { Technician } from 'src/technicians/entities/technician.entity';
 import { Manager } from 'src/managers/entities/manager.entity';
 import { Regent } from 'src/regents/entities/regent.entity';
+import validator from 'validator';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class AuthService {
@@ -45,7 +47,7 @@ export class AuthService {
 
     async validateUser(username: string, plainPassword: string, role: number): Promise<any> {
         const key = Object.keys(roles).find(key => roles[key] === role)
-        if (!key) throw new BadRequestException("Không tìm thấy mã vai trò tương ứng!")
+        if (!key) throw new BadRequestException(["Không tìm thấy mã vai trò tương ứng!"])
         switch (key) {
             case "owner": {
                 const owner = await this.ownersRepository.findOne({
@@ -145,7 +147,7 @@ export class AuthService {
                 const { password, ...result } = manager
                 return result
             }
-            default: throw new BadRequestException("Không tìm thấy mã vai trò tương ứng!")
+            default: throw new BadRequestException(["Không tìm thấy mã vai trò tương ứng!"])
         }
     }
 
@@ -162,93 +164,48 @@ export class AuthService {
 
     async sendVerifyEmail(id: string, role: number) {
         const key = Object.keys(roles).find(key => roles[key] === role)
-        if (!key) throw new BadRequestException("Không tìm thấy mã vai trò tương ứng!")
-        switch (key) {
-            case "owner": {
-                const owner = await this.ownersRepository.findOne({
-                    where: {
-                        username: id,
-                        active: true
-                    },
-                    select: ['id', 'email', "name", "active", "isVerify", "expiredAt", "verifyId"],
-                })
-                if (!owner) throw new BadRequestException("Không tìm thấy chủ hộ đang hoạt động với mã số này, vui lòng kiểm tra lại!")
-                if (owner.isVerify) throw new BadRequestException("Tài khoản này đã được xác thực email!")
-                if (owner.expiredAt && isAfter(owner.expiredAt, add(new Date(), { minutes: 3 }))) {
-                    return {
-                        message: `Mã xác thực đã được gửi tới email ${maskEmail(owner.email)} cách đây ít phút. Chưa thể gửi mã mới ngay. Vui lòng kiểm tra email gần nhất`,
-                    }
-                }
-                const verifyId = generateSecureOtp()
-                const update = await this.ownersRepository.update(owner.id, {
-                    expiredAt: add(new Date(), { minutes: 5 }),
-                    verifyId
-                })
-                if (update.affected === 0) throw new BadRequestException("Lỗi khi tạo mã xác thực!")
-
-                this.mailerService
-                    .sendMail({
-                        to: owner.email,
-                        subject: 'Xác nhận email tài khoản cư dân',
-                        text: 'Welcome',
-                        template: "verify",
-                        context: {
-                            name: owner.name,
-                            verifyId
-                        }
-                    })
-                    .then(() => { })
-                    .catch(() => { });
-                return {
-                    message: `Mã xác thực đã được gửi tới email ${maskEmail(owner.email)}. Vui lòng kiểm tra và xác thực.`,
-                }
-            }
-            case "resident": {
-                const resident = await this.residentsRepository.findOne({
-                    where: {
-                        username: id,
-                        active: true
-                    },
-                    select: ['id', 'email', "name", "active", "isVerify", "expiredAt", "verifyId"],
-                })
-                if (!resident) throw new BadRequestException("Không tìm thấy cư dân đang hoạt động với mã số này, vui lòng kiểm tra lại!")
-                if (resident.isVerify) throw new BadRequestException("Tài khoản này đã được xác thực email!")
-                if (resident.expiredAt && isAfter(resident.expiredAt, add(new Date(), { minutes: 3 }))) {
-                    return {
-                        message: `Mã xác thực đã được gửi tới email ${maskEmail(resident.email)} cách đây ít phút. Chưa thể gửi mã mới ngay. Vui lòng kiểm tra email gần nhất`,
-                    }
-                }
-                const verifyId = generateSecureOtp()
-                const update = await this.residentsRepository.update(resident.id, {
-                    expiredAt: add(new Date(), { minutes: 5 }),
-                    verifyId
-                })
-                if (update.affected === 0) throw new BadRequestException("Lỗi khi tạo mã xác thực!")
-
-                this.mailerService
-                    .sendMail({
-                        to: resident.email,
-                        subject: 'Xác nhận email tài khoản cư dân',
-                        text: 'Welcome',
-                        template: "verify",
-                        context: {
-                            name: resident.name,
-                            verifyId
-                        }
-                    })
-                    .then(() => { })
-                    .catch(() => { });
-                return {
-                    message: `Mã xác thực đã được gửi tới email ${maskEmail(resident.email)}. Vui lòng kiểm tra và xác thực.`,
-                }
-            }
-            default: throw new BadRequestException("Không tìm thấy mã vai trò tương ứng!")
+        if (key !== "owner" && key !== "resident") throw new BadRequestException(["Không tìm thấy mã vai trò tương ứng!"])
+        const user = await this[`${key}sRepository`].findOne({
+            where: {
+                username: id,
+                active: true
+            },
+            select: ['id', 'email', "name", "active", "isVerify", "expiredAt", "verifyId"],
+        })
+        if (!user) throw new BadRequestException("Không tìm thấy chủ hộ đang hoạt động với mã số này, vui lòng kiểm tra lại!")
+        if (user.isVerify) throw new BadRequestException("Tài khoản này đã được xác thực email!")
+        if (user.expiredAt && isAfter(user.expiredAt, add(new Date(), { minutes: 3 }))) {
+            throw new BadRequestException([`Mã xác thực đã được gửi tới email ${maskEmail(user.email)} cách đây ít phút. Chưa thể gửi mã mới ngay. Vui lòng kiểm tra email gần nhất!`])
         }
+        const verifyId = generateSecureOtp()
+        const update = await this[`${key}sRepository`].update(user.id, {
+            expiredAt: add(new Date(), { minutes: 5 }),
+            verifyId
+        })
+        if (update.affected === 0) throw new BadRequestException("Lỗi khi tạo mã xác thực!")
+
+        this.mailerService
+            .sendMail({
+                to: user.email,
+                subject: 'Xác nhận email tài khoản cư dân',
+                text: 'Welcome',
+                template: "verify",
+                context: {
+                    name: user.name,
+                    verifyId
+                }
+            })
+            .then(() => { })
+            .catch(() => { });
+        return {
+            message: `Mã xác thực đã được gửi tới email ${maskEmail(user.email)}. Vui lòng kiểm tra và xác thực.`,
+        }
+
     }
 
     async verifyEmail(id: string, role: number, otp: string) {
         const key = Object.keys(roles).find(key => roles[key] === role)
-        if (!key) throw new BadRequestException("Không tìm thấy mã vai trò tương ứng!")
+        if (!key) throw new BadRequestException(["Không tìm thấy mã vai trò tương ứng!"])
         switch (key) {
             case "owner": {
                 const owner = await this.ownersRepository.findOne({
@@ -288,13 +245,13 @@ export class AuthService {
                     message: "Xác thực thành công, vui lòng đăng nhập lại",
                 }
             }
-            default: throw new BadRequestException("Không tìm thấy mã vai trò tương ứng!")
+            default: throw new BadRequestException(["Không tìm thấy mã vai trò tương ứng!"])
         }
     }
 
     async changePassword(user, newPassword: string, currentPassword: string) {
         const key = Object.keys(roles).find(key => roles[key] === user.role)
-        if (!key) throw new BadRequestException("Không tìm thấy mã vai trò tương ứng!")
+        if (!key) throw new BadRequestException(["Không tìm thấy mã vai trò tương ứng!"])
         switch (key) {
             case "owner": {
                 const owner = await this.ownersRepository.findOne({
@@ -422,13 +379,13 @@ export class AuthService {
                     message: "Đổi mật khẩu thành công",
                 }
             }
-            default: throw new BadRequestException("Không tìm thấy mã vai trò tương ứng!")
+            default: throw new BadRequestException(["Không tìm thấy mã vai trò tương ứng!"])
         }
     }
 
     async changeUsername(user, newUsername: string) {
         const key = Object.keys(roles).find(key => roles[key] === user.role)
-        if (!key) throw new BadRequestException("Không tìm thấy mã vai trò tương ứng!")
+        if (!key) throw new BadRequestException(["Không tìm thấy mã vai trò tương ứng!"])
         const username = await this[`${key}sRepository`].findOne({
             where: {
                 username: newUsername
@@ -439,4 +396,89 @@ export class AuthService {
         if (update.affected === 0) throw new BadRequestException(["Không thể cập nhật tên tài khoản mới!"])
         return { message: "Cập nhật tên tài khoản mới thành công" }
     }
+
+    async forgetUsername(email: string, id: number) {
+        if (!validator.isEmail(email)) throw new BadRequestException(["Email phải đúng định dạng example@example"])
+        const key = Object.keys(roles).find(key => roles[key] === id)
+        if (!key) throw new BadRequestException(["Không tìm thấy mã vai trò tương ứng!"])
+        const user = await this[`${key}sRepository`].findOne({
+            where: {
+                email
+            }
+        })
+        if (!user) throw new BadRequestException(["Không tìm thấy người dùng, vui lòng kiểm tra lại email và vai trò!"])
+        this.mailerService
+            .sendMail({
+                to: email,
+                subject: 'Tên đăng nhập tài khoản',
+                text: "Tài khoản",
+                template: "fgusername",
+                context: {
+                    name: user.name,
+                    username: user.username
+                }
+            })
+            .then()
+            .catch((e) => {
+                console.log(e);
+            });
+        return {
+            message: `Tên đăng nhập đã được gửi tới email ${maskEmail(user.email)}. Vui lòng kiểm tra.`,
+        }
+    }
+
+    async sendLinkEmail(email: string, id: number) {
+        const key = Object.keys(roles).find(key => roles[key] === id)
+        if (!key) throw new BadRequestException(["Không tìm thấy mã vai trò tương ứng!"])
+        if (!validator.isEmail(email)) throw new BadRequestException(["Email phải đúng định dạng example@example"])
+
+        const user = await this[`${key}sRepository`].findOne({
+            where: {
+                email
+            }
+        })
+        if (!user) throw new BadRequestException(["Không tìm thấy người dùng, vui lòng kiểm tra lại email và vai trò!"])
+        const code = uuidv4()
+        const hashCode = await hashPassword(code)
+        user.resetCode = hashCode
+        await this[`${key}sRepository`].save(user)
+        this.mailerService
+            .sendMail({
+                to: email,
+                subject: 'Đường dẫn đổi mật khẩu',
+                text: "Bảo mật",
+                template: "fgpassword",
+                context: {
+                    name: user.name,
+                    link: `${process.env.CLIENT_URL}/reset?code=${code}&id=${user.id}&role=${user.role}`
+                }
+            })
+            .then()
+            .catch((e) => {
+                console.log(e);
+            });
+        return {
+            message: `Link đổi mật khẩu đã được gửi tới email ${maskEmail(user.email)}. Vui lòng kiểm tra và đổi mật khẩu.`,
+        }
+    }
+
+    async resetPassword(id: string, role: number, code: string, password: string) {
+        const key = Object.keys(roles).find(key => roles[key] === role)
+        if (!key) throw new BadRequestException(["Không tìm thấy mã vai trò tương ứng!"])
+        const user = await this[`${key}sRepository`].findOne({
+            where: {
+                id
+            },
+            select: ["resetCode"]
+        })
+        if (!user?.resetCode) throw new UnauthorizedException(["Không thấy mã xác thực của tài khoản này!"])
+        const compare = await comparePassword(code, user.resetCode)
+        if (!compare) throw new UnauthorizedException(["Mã xác thực không chính xác!"])
+        else {
+            const hash = await hashPassword(password)
+            await this[`${key}sRepository`].update(id, { resetCode: null, password: hash })
+            return { message: "Cập nhật mật khẩu mới thành công" }
+        }
+    }
 }
+

@@ -32,6 +32,24 @@ export class AuthController {
         return this.authService.verifyEmail(id, +role, otp)
     }
 
+    @Public()
+    @Post("forgetUn")
+    async forgetUsername(@Body("email") email: string, @Body("id") id: string) {
+        return this.authService.forgetUsername(email, +id)
+    }
+
+    @Public()
+    @Patch("reset")
+    async sendLinkEmail(@Body("email") email: string, @Body("id") id: string) {
+        return this.authService.sendLinkEmail(email, +id)
+    }
+
+    @Public()
+    @Patch("resetPw")
+    async resetPassword(@Body("role") role: string, @Body("id") id: string, @Body("code") code: string, @Body("password") password: string) {
+        return this.authService.resetPassword(id, +role, code, password)
+    }
+
     @Patch("changePw")
     async changePassword(@Body() body: { newPassword: string, currentPassword: string }, @Request() req) {
         const { newPassword, currentPassword } = body

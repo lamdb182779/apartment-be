@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Request } from '@nestjs/common';
 import { ResidentsService } from './residents.service';
 import { CreateResidentDto } from './dto/create-resident.dto';
 import { UpdateResidentDto } from './dto/update-resident.dto';
@@ -20,6 +20,18 @@ export class ResidentsController {
   findAll(@Query() query: Record<string, string>) {
     const { current, pageSize, orderBy, active, ...filter } = query
     return this.residentsService.findAll(filter, +current, +pageSize, orderBy, active);
+  }
+
+  @Roles("resident")
+  @Get("apartment")
+  findSelfApartment(@Request() req) {
+    return this.residentsService.findSelfApartment(req.user.id);
+  }
+
+  @Roles("resident")
+  @Get("apartment-info")
+  findApartmentInfo(@Request() req) {
+    return this.residentsService.findApartmentInfo(req.user.id);
   }
 
   @Get(':id')

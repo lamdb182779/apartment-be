@@ -16,8 +16,9 @@ export class VisitorsController {
 
   @Roles("manager", "receptionist")
   @Get()
-  findAll(@Query() query) {
-    return this.visitorsService.findAll(query);
+  findAll(@Query() query: Record<string, string>) {
+    const { current, pageSize, date } = query
+    return this.visitorsService.findAll(+current, +pageSize, new Date(date));
   }
 
   @Get(':id')

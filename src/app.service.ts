@@ -38,7 +38,7 @@ export class AppService {
   }
   async updateAvatar(user, image: string) {
     const key = Object.keys(roles).find(key => roles[key] === user.role)
-    if (!key) throw new BadRequestException("Không tìm thấy mã vai trò tương ứng!")
+    if (!key) throw new BadRequestException(["Không tìm thấy mã vai trò tương ứng!"])
     const update = await this[`${key}sRepository`].update(user.id, { image })
     if (update.affected === 0) throw new BadRequestException(["Không thể cập nhật ảnh đại diện!"])
     return { message: "Cập nhật ảnh đại diện thành công" }

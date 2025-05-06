@@ -6,6 +6,7 @@ import { Apartment } from './entities/apartment.entity';
 import { Between, IsNull, Not, Repository } from 'typeorm';
 import { addMonths, isBefore, setDate, startOfMonth, subDays, subMonths } from 'date-fns';
 import { Room } from 'src/rooms/entities/room.entity';
+import { roles } from 'src/helpers/utils';
 
 @Injectable()
 export class ApartmentsService {

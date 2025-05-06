@@ -33,6 +33,9 @@ export class Resident {
     @Column({ select: false })
     password: string;
 
+    @Column({ nullable: true, select: false })
+    resetCode: string;
+
     @Column({ default: false })
     isVerify: boolean;
 

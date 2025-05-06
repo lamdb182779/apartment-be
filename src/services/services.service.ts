@@ -44,7 +44,9 @@ export class ServicesService {
     return { results: services, totalPages: Math.ceil(count / pageSize) }
   }
 
-  async findAllBySelf(user: any) {
+  async findAllBySelf(user: any, current: number, pageSize: number) {
+    current = (current && current > 0) ? current : 1
+    pageSize = (pageSize && pageSize > 0) ? pageSize : 5
     const role = user.role
     const key = Object.keys(roles).find(key => roles[key] === role)
     switch (key) {
@@ -55,7 +57,9 @@ export class ServicesService {
           select: ["number"],
         })
         const apartmentNumbers = apartments.map(apartment => apartment.number)
-        const services = await this.servicesRepository.find({
+        const [services, count] = await this.servicesRepository.findAndCount({
+          take: pageSize,
+          skip: (current - 1) * pageSize,
           where: {
             apartment: {
               number: In(apartmentNumbers)
@@ -66,15 +70,20 @@ export class ServicesService {
             createdAt: "DESC"
           }
         })
-        return services.map(({ apartment, ...rest }) => { return { ...rest, apartment: apartment.number } })
+        return {
+          results: services.map(({ apartment, ...rest }) => { return { ...rest, apartment: apartment.number } }),
+          totalPages: Math.ceil(count / pageSize)
+        }
       }
       case "resident": {
         const resident = await this.residentsRepository.findOne({
-          where: user,
+          where: { id: user.id },
           relations: ["apartment"],
         })
         const apartmentNumber = resident.apartment.number
-        const services = await this.servicesRepository.find({
+        const [services, count] = await this.servicesRepository.findAndCount({
+          take: pageSize,
+          skip: (current - 1) * pageSize,
           where: {
             apartment: {
               number: apartmentNumber
@@ -85,7 +94,10 @@ export class ServicesService {
             createdAt: "DESC"
           }
         })
-        return services.map(({ apartment, ...rest }) => { return { ...rest, apartment: apartment.number } })
+        return {
+          results: services.map(({ apartment, ...rest }) => { return { ...rest, apartment: apartment.number } }),
+          totalPages: Math.ceil(count / pageSize)
+        }
       }
       default: throw new BadRequestException("Vai trò người dùng không phù hợp!")
     }

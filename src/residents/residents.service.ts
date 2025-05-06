@@ -3,10 +3,10 @@ import { CreateResidentDto } from './dto/create-resident.dto';
 import { UpdateResidentDto } from './dto/update-resident.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Resident } from './entities/resident.entity';
-import { IsNull, Not, Repository } from 'typeorm';
+import { Between, IsNull, Not, Repository } from 'typeorm';
 import { Apartment } from 'src/apartments/entities/apartment.entity';
 import { generateUsername, hashPassword, transformFilterToILike } from 'src/helpers/utils';
-import { add } from 'date-fns';
+import { add, subMonths } from 'date-fns';
 
 @Injectable()
 export class ResidentsService {
@@ -70,6 +70,55 @@ export class ResidentsService {
       relations: ["apartment"]
     })
     return { results: residents.map(({ createdAt, updatedAt, ...resident }) => resident), totalPages: Math.ceil(count / pageSize) }
+  }
+
+  async findApartmentInfo(id: string) {
+    const now = new Date()
+    const apartment = await this.apartmentsRepository.findOne({
+      where: {
+        residents: { id },
+        parameters: {
+          month: Between(subMonths(now, 6), now),
+          value: Not(IsNull())
+        },
+      },
+      relations: ["parameters", "residents", "rooms"]
+    })
+    const { updatedAt, createdAt, parameters, residents, rooms, ...result } = apartment
+    return {
+      ...result, parameters: parameters.reduce((acc, parameter) => {
+        if (parameter.type === "electric") {
+          acc.electric.push(parameter);
+        } else if (parameter.type === "water") {
+          acc.water.push(parameter);
+        }
+        return acc
+      }, { electric: [], water: [] }),
+      residents: residents.map(({ name, active }) => active ? name : null).filter(Boolean),
+      rooms: rooms.map(({ createdAt, updatedAt, ...room }) => room)
+    }
+  }
+
+  async findSelfApartment(id: string) {
+    const apartments = await this.apartmentsRepository.find({
+      where: {
+        residents: {
+          id,
+        },
+      },
+      relations: ["owner", "residents", "rooms", "bills"]
+    })
+    return apartments.map(({ createdAt, updatedAt, owner, residents, rooms, bills, ...apartment }) => {
+      return {
+        ...apartment,
+        residents: residents.map(({ name, active }) => active ? name : null).filter(Boolean),
+        rooms: rooms.map(({ type }) => type),
+        debt: bills.reduce((acc: number, bill) => {
+          if (bill.isPaid) return acc
+          return bill.amount - 0 + acc
+        }, 0)
+      }
+    })
   }
 
   findOne(id: string) {

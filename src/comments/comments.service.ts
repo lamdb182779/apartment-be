@@ -41,13 +41,14 @@ export class CommentsService {
 
   async findAll(current: number, pageSize: number) {
     current = (current && current > 0) ? current : 1
-    pageSize = (pageSize && pageSize > 0) ? pageSize : 10
+    pageSize = (pageSize && pageSize > 0) ? pageSize : 5
     const [cmt, count] = await this.commentsRepository.findAndCount({
       take: pageSize,
       skip: (current - 1) * pageSize,
       order: {
         createdAt: "ASC"
-      }
+      },
+      relations: ["owner", "resident", "replies"]
     })
     return { results: cmt, totalPages: Math.ceil(count / pageSize) }
   }
@@ -56,7 +57,7 @@ export class CommentsService {
     const role = user.role
     const key = Object.keys(roles).find(key => roles[key] === role)
     current = (current && current > 0) ? current : 1
-    pageSize = (pageSize && pageSize > 0) ? pageSize : 10
+    pageSize = (pageSize && pageSize > 0) ? pageSize : 5
 
     const [cmt, count] = await this.commentsRepository.findAndCount({
       where: {
@@ -68,7 +69,8 @@ export class CommentsService {
       skip: (current - 1) * pageSize,
       order: {
         createdAt: "ASC"
-      }
+      },
+      relations: ["replies"]
     })
     return { results: cmt, totalPages: Math.ceil(count / pageSize) }
   }
@@ -81,7 +83,11 @@ export class CommentsService {
     return `This action updates a #${id} comment`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} comment`;
+  async remove(id: string, user) {
+    const role = user.role
+    const key = Object.keys(roles).find(key => roles[key] === role)
+    const del = await this.commentsRepository.delete({ id, [key]: { id: user.id } })
+    if (del.affected === 0) throw new BadRequestException(["Không thể xóa đánh giá này!"])
+    return { message: "Xóa đánh giá thành công" }
   }
 }
