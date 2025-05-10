@@ -46,18 +46,22 @@ import { RepliesModule } from './replies/replies.module';
       inject: [ConfigService],
       // Use useFactory, useClass, or useExisting
       // to configure the DataSourceOptions.
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get<string>('DB_HOST'),
-        port: configService.get<number>('DB_PORT'),
-        username: configService.get<string>('DB_USERNAME'),
-        password: configService.get<string>('DB_PASSWORD'),
-        database: configService.get<string>('DB_DATABASE'),
-        entities: [
-          "dist/**/*.entity.js"
-        ],
-        synchronize: true,
-      }),
+      useFactory: (configService: ConfigService) => {
+        const url = configService.get<string>('DB_URL')
+        return ({
+          type: 'postgres',
+          // host: configService.get<string>('DB_HOST'),
+          // port: configService.get<number>('DB_PORT'),
+          // username: configService.get<string>('DB_USERNAME'),
+          // password: configService.get<string>('DB_PASSWORD'),
+          // database: configService.get<string>('DB_DATABASE'),
+          url,
+          entities: [
+            "dist/**/*.entity.js"
+          ],
+          synchronize: true,
+        })
+      },
       // dataSource receives the configured DataSourceOptions
       // and returns a Promise<DataSource>.
       dataSourceFactory: async (options) => {
