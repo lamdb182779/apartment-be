@@ -152,6 +152,21 @@ export class ResidentsService {
     await this.residentsRepository.save(resident)
     return { message: "Cập nhật thành công" }
   }
+  async reactive(id: string) {
+    const update = await this.residentsRepository.update(id, {
+      active: true
+    })
+    if (update.affected === 0) throw new BadRequestException(["Không thể ngừng hoạt động cư dân với mã số này!"])
+    return ({ message: "Khôi phục thành công" })
+  }
+
+  async deactive(id: string) {
+    const update = await this.residentsRepository.update(id, {
+      active: false
+    })
+    if (update.affected === 0) throw new BadRequestException(["Không thể ngừng hoạt động cư dân với mã số này!"])
+    return ({ message: "Ngừng hoạt động thành công" })
+  }
 
   remove(id: string) {
     return `This action removes a #${id} resident`;

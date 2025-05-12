@@ -2,6 +2,7 @@ import { Apartment } from 'src/apartments/entities/apartment.entity';
 import { NotificationRead } from 'src/notifications/entities/notification.entity';
 import { Comment } from 'src/comments/entities/comment.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Vehicle } from 'src/vehicles/entities/vehicle.entity';
 
 @Entity()
 export class Owner {
@@ -46,6 +47,9 @@ export class Owner {
 
     @OneToMany(() => Apartment, apartment => apartment.owner)
     apartments: Apartment[]
+
+    @OneToMany(() => Vehicle, vehicle => vehicle.owner)
+    vehicles: Vehicle[]
 
     @OneToMany(() => NotificationRead, reads => reads.owner)
     reads: NotificationRead[]

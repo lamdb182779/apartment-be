@@ -121,6 +121,7 @@ export class OwnersService {
     if (update.affected === 0) throw new BadRequestException(["Không thể ngừng hoạt động chủ hộ với mã số này!"])
     return ({ message: "Ngừng hoạt động thành công" })
   }
+
   async reactive(id: string) {
     const update = await this.ownersRepository.update(id, {
       active: true

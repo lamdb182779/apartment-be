@@ -392,7 +392,7 @@ export class AuthService {
             }
         })
         if (username) throw new BadRequestException(["Tên tài khoản đã tồn tại, vui lòng lựa chọn tên khác!"])
-        const update = this[`${key}sRepository`].update(user.id, { username: newUsername })
+        const update = await this[`${key}sRepository`].update(user.id, { username: newUsername })
         if (update.affected === 0) throw new BadRequestException(["Không thể cập nhật tên tài khoản mới!"])
         return { message: "Cập nhật tên tài khoản mới thành công" }
     }

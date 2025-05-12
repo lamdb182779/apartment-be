@@ -39,6 +39,18 @@ export class ResidentsController {
     return this.residentsService.findOne(id);
   }
 
+  @Roles("manager", "receptionist")
+  @Patch('deactive/:id')
+  deactive(@Param() param: IdParamDto) {
+    return this.residentsService.deactive(param.id)
+  }
+
+  @Roles("manager", "receptionist")
+  @Patch('reactive/:id')
+  reactive(@Param() param: IdParamDto) {
+    return this.residentsService.reactive(param.id)
+  }
+
   @Patch(':id')
   update(@Param() param: IdParamDto, @Body() updateResidentDto: UpdateResidentDto) {
     return this.residentsService.update(param.id, updateResidentDto);

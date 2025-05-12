@@ -7,6 +7,7 @@ import { Comment } from 'src/comments/entities/comment.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Owner } from 'src/owners/entities/owner.entity';
+import { Roles } from 'src/helpers/decorators';
 
 @Injectable()
 export class CommentsService {
@@ -20,6 +21,7 @@ export class CommentsService {
     @InjectRepository(Resident)
     private residentsRepository: Repository<Resident>
   ) { }
+  @Roles("owner", "resident")
   async create(createCommentDto: CreateCommentDto, user: any) {
     const role = user.role
     const key = Object.keys(roles).find(key => roles[key] === role)
