@@ -15,7 +15,7 @@ export class OwnersController {
     return this.ownersService.create(createOwnerDto);
   }
 
-  @Roles("manager", "receptionist")
+  @Roles("manager", "receptionist", "technician")
   @Get()
   findAll(@Query() query: Record<string, string>) {
     const { current, pageSize, orderBy, active, ...filter } = query

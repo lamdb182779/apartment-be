@@ -8,13 +8,16 @@ export class Vehicle {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column({ nullable: false, unique: true })
+    @Column({ unique: true, nullable: true })
     name: string;
 
-    @Column({ nullable: false })
-    type: string;
+    @Column()
+    type: "Xe đạp" | "Xe máy" | "Ô tô" | "Khác";
 
-    @Column({ nullable: false })
+    @Column()
+    brand: string;
+
+    @Column()
     image: string;
 
     @ManyToOne(() => Resident, resident => resident.vehicles, { onDelete: "CASCADE" })

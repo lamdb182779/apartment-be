@@ -15,7 +15,7 @@ export class ResidentsController {
     return this.residentsService.create(createResidentDto);
   }
 
-  @Roles("manager", "receptionist")
+  @Roles("manager", "receptionist", "technician")
   @Get()
   findAll(@Query() query: Record<string, string>) {
     const { current, pageSize, orderBy, active, ...filter } = query
@@ -32,6 +32,12 @@ export class ResidentsController {
   @Get("apartment-info")
   findApartmentInfo(@Request() req) {
     return this.residentsService.findApartmentInfo(req.user.id);
+  }
+
+  @Roles("manager", "technician")
+  @Get("all")
+  findAllByName(@Query("name") name: string) {
+    return this.residentsService.findAllByName(name)
   }
 
   @Get(':id')

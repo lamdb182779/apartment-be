@@ -3,7 +3,7 @@ import { CreateResidentDto } from './dto/create-resident.dto';
 import { UpdateResidentDto } from './dto/update-resident.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Resident } from './entities/resident.entity';
-import { Between, IsNull, Not, Repository } from 'typeorm';
+import { Between, ILike, IsNull, Not, Repository } from 'typeorm';
 import { Apartment } from 'src/apartments/entities/apartment.entity';
 import { generateUsername, hashPassword, transformFilterToILike } from 'src/helpers/utils';
 import { add, subMonths } from 'date-fns';
@@ -97,6 +97,16 @@ export class ResidentsService {
       residents: residents.map(({ name, active }) => active ? name : null).filter(Boolean),
       rooms: rooms.map(({ createdAt, updatedAt, ...room }) => room)
     }
+  }
+
+  async findAllByName(name: string) {
+    const residents = await this.residentsRepository.find({
+      where: {
+        name: ILike(`%${name}%`)
+      },
+      relations: ["apartment"]
+    })
+    return residents.map(({ apartment, name, id }) => ({ name, id, apartment: apartment.number }))
   }
 
   async findSelfApartment(id: string) {

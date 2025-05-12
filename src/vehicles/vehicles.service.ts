@@ -21,11 +21,11 @@ export class VehiclesService {
     private residentsRepository: Repository<Resident>
   ) { }
   async create(createVehicleDto: CreateVehicleDto) {
-    const { name, image, roleId, type, ownerId } = createVehicleDto
+    const { name, image, roleId, type, ownerId, brand } = createVehicleDto
     const key = Object.keys(roles).find(key => roles[key] === roleId)
     const owner = await this[`${key}sRepository`].findOneBy({ id: ownerId })
     if (!owner) throw new NotFoundException(["Không tìm thấy mã chủ xe này!"])
-    const vehicle = await this.vehiclesRepository.save({ name, image, type, [key]: owner })
+    const vehicle = await this.vehiclesRepository.save({ name, image, type, brand, [key]: owner })
     if (!vehicle) throw new BadRequestException(["Lỗi khi thêm mới thông tin xe!"])
     return { message: "Thêm mới thông tin xe thành công" };
   }
@@ -49,7 +49,7 @@ export class VehiclesService {
           owner: { active: true },
         }
       ],
-      relations: ["owner", "resident", "resident.apartment"]
+      relations: ["owner", "resident", "resident.apartment", "owner.apartments"]
     })
     return { results: vehicles, totalPages: Math.ceil(count / pageSize) }
   }

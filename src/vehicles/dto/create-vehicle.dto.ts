@@ -2,7 +2,7 @@ import { Type } from "class-transformer";
 import { IsIn, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
 
 export class CreateVehicleDto {
-    @IsNotEmpty({ message: "Biển xe không được để trống!" })
+    @IsOptional()
     @IsString({ message: "Biển xe phải là một chuỗi văn bản!" })
     name: string;
 
@@ -10,10 +10,13 @@ export class CreateVehicleDto {
     @IsString({ message: "Địa chỉ hình ảnh phải là một chuỗi văn bản!" })
     image: string;
 
+    @IsNotEmpty({ message: "Loại xe không được để trống!" })
+    @IsString({ message: "Loại xe phải là một chuỗi văn bản!" })
+    type: "Xe đạp" | "Xe máy" | "Ô tô" | "Khác";
+
     @IsNotEmpty({ message: "Hãng xe không được để trống!" })
     @IsString({ message: "Hãng xe phải là một chuỗi văn bản!" })
-    type: string;
-
+    brand: string;
 
     @IsNotEmpty({ message: "Mã số chủ xe không được để trống!" })
     @IsUUID(undefined, { message: "Mã số chủ xe không đúng định dạng uuid!" })

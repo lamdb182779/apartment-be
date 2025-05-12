@@ -10,7 +10,7 @@ export class ParametersController {
 
   @Post()
   create() {
-    // return this.parametersService.create();
+    return this.parametersService.create();
   }
 
   @Roles("manager", "technician")
