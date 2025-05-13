@@ -1,3 +1,4 @@
+import { Task } from 'src/tasks/entities/task.entity';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
@@ -31,6 +32,9 @@ export class Accountant {
 
     @Column({ nullable: true, select: false })
     resetCode: string;
+
+    @OneToMany(() => Task, task => task.accountant)
+    tasks: Task[]
 
     @CreateDateColumn()
     createdAt: Date

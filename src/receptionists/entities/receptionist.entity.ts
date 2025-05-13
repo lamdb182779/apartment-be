@@ -1,4 +1,5 @@
 import { Notification } from "src/notifications/entities/notification.entity";
+import { Task } from "src/tasks/entities/task.entity";
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()
@@ -32,6 +33,9 @@ export class Receptionist {
 
     @Column({ nullable: true, select: false })
     resetCode: string;
+
+    @OneToMany(() => Task, task => task.receptionist)
+    tasks: Task[]
 
     @CreateDateColumn()
     createdAt: Date
