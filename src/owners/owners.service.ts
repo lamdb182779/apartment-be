@@ -74,7 +74,7 @@ export class OwnersService {
       },
       relations: ["apartments"]
     })
-    return { results: owners.map(({ createdAt, updatedAt, ...owner }) => owner), totalPages: Math.ceil(count / pageSize) }
+    return { results: owners.map(({ createdAt, updatedAt, username, isVerify, ...owner }) => ({ ...owner, isVerify, username: !isVerify ? username : undefined })), totalPages: Math.ceil(count / pageSize) }
   }
 
   async findSelfApartment(id: string) {

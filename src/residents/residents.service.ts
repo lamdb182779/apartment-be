@@ -69,7 +69,7 @@ export class ResidentsService {
       },
       relations: ["apartment"]
     })
-    return { results: residents.map(({ createdAt, updatedAt, ...resident }) => resident), totalPages: Math.ceil(count / pageSize) }
+    return { results: residents.map(({ createdAt, updatedAt, username, isVerify, ...resident }) => ({ ...resident, isVerify, username: !isVerify ? username : undefined })), totalPages: Math.ceil(count / pageSize) }
   }
 
   async findApartmentInfo(id: string) {
