@@ -10,7 +10,6 @@ import { Accountant } from 'src/accountants/entities/accountant.entity';
 import { Receptionist } from 'src/receptionists/entities/receptionist.entity';
 import { Technician } from 'src/technicians/entities/technician.entity';
 import { Manager } from 'src/managers/entities/manager.entity';
-import { Regent } from 'src/regents/entities/regent.entity';
 import { Resident } from 'src/residents/entities/resident.entity';
 import { roles } from 'src/helpers/utils';
 
@@ -33,9 +32,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     @InjectRepository(Manager)
     private managersRepository: Repository<Manager>,
-
-    @InjectRepository(Regent)
-    private regentsRepository: Repository<Regent>,
 
     @InjectRepository(Resident)
     private residentsRepository: Repository<Resident>,
@@ -91,14 +87,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         })
         if (!technician) throw new UnauthorizedException("Không tìm thấy kỹ thuật viên đang hoạt động với tài khoản này, vui lòng kiểm tra lại!")
         return technician
-      }
-      case "regent": {
-        const regent = await this.regentsRepository.findOneBy({
-          id,
-          active: true
-        })
-        if (!regent) throw new UnauthorizedException("Không tìm thấy thành viên ban quản trị đang hoạt động với tài khoản này, vui lòng kiểm tra lại!")
-        return regent
       }
       case "manager": {
         const manager = await this.managersRepository.findOneBy({

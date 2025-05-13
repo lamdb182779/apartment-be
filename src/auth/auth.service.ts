@@ -11,7 +11,6 @@ import { add, isAfter, isBefore } from 'date-fns';
 import { Receptionist } from 'src/receptionists/entities/receptionist.entity';
 import { Technician } from 'src/technicians/entities/technician.entity';
 import { Manager } from 'src/managers/entities/manager.entity';
-import { Regent } from 'src/regents/entities/regent.entity';
 import validator from 'validator';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -32,9 +31,6 @@ export class AuthService {
 
         @InjectRepository(Manager)
         private managersRepository: Repository<Manager>,
-
-        @InjectRepository(Regent)
-        private regentsRepository: Repository<Regent>,
 
         @InjectRepository(Resident)
         private residentsRepository: Repository<Resident>,
@@ -117,20 +113,6 @@ export class AuthService {
                 const compare = await comparePassword(plainPassword, technician.password)
                 if (!compare) throw new UnauthorizedException("Sai mật khẩu, vui lòng kiểm tra lại!")
                 const { password, ...result } = technician
-                return result
-            }
-            case "regent": {
-                const regent = await this.regentsRepository.findOne({
-                    where: {
-                        username: username,
-                        active: true
-                    },
-                    select: ['id', 'username', 'email', 'password', "active", "image", "name", "phone", "role"],
-                })
-                if (!regent) throw new UnauthorizedException("Không tìm thấy thành viên ban quản trị đang hoạt động với tài khoản này, vui lòng kiểm tra lại!")
-                const compare = await comparePassword(plainPassword, regent.password)
-                if (!compare) throw new UnauthorizedException("Sai mật khẩu, vui lòng kiểm tra lại!")
-                const { password, ...result } = regent
                 return result
             }
             case "manager": {
@@ -356,24 +338,6 @@ export class AuthService {
                 if (!compare) throw new UnauthorizedException("Sai mật khẩu, vui lòng kiểm tra lại!")
                 const hash = await hashPassword(newPassword)
                 const update = await this.managersRepository.update(user.id, { password: hash })
-                if (update.affected === 0) throw new BadRequestException("Lỗi khi cập nhật mật khẩu!")
-                return {
-                    message: "Đổi mật khẩu thành công",
-                }
-            }
-            case "regent": {
-                const regent = await this.regentsRepository.findOne({
-                    where: {
-                        id: user.id,
-                        active: true
-                    },
-                    select: ['password'],
-                })
-                if (!regent) throw new BadRequestException("Không tìm thấy trưởng ban quản lý đang hoạt động với mã số này, vui lòng kiểm tra lại!")
-                const compare = await comparePassword(currentPassword, regent.password)
-                if (!compare) throw new UnauthorizedException("Sai mật khẩu, vui lòng kiểm tra lại!")
-                const hash = await hashPassword(newPassword)
-                const update = await this.regentsRepository.update(user.id, { password: hash })
                 if (update.affected === 0) throw new BadRequestException("Lỗi khi cập nhật mật khẩu!")
                 return {
                     message: "Đổi mật khẩu thành công",

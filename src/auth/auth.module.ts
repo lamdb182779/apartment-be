@@ -13,12 +13,11 @@ import { ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './jwt.strategy';
 import { Receptionist } from 'src/receptionists/entities/receptionist.entity';
 import { Technician } from 'src/technicians/entities/technician.entity';
-import { Regent } from 'src/regents/entities/regent.entity';
 import { Manager } from 'src/managers/entities/manager.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Owner, Resident, Accountant, Receptionist, Technician, Regent, Manager]),
+    TypeOrmModule.forFeature([Owner, Resident, Accountant, Receptionist, Technician, Manager]),
     PassportModule,
     JwtModule.registerAsync({
       inject: [ConfigService],

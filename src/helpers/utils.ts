@@ -96,19 +96,9 @@ export const roles = {
     owner: 31,
     resident: 32,
     manager: 12,
-    regent: 11,
     technician: 23,
     receptionist: 21
 }
-
-export const roomType = {
-    livingroom: 1,
-    kitchen: 2,
-    bedroom: 3,
-    toilet: 4,
-    another: 0
-}
-
 
 
 export const sortObject = (obj) => {

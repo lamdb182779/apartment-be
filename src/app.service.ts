@@ -2,7 +2,6 @@ import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Resident } from './residents/entities/resident.entity';
-import { Regent } from './regents/entities/regent.entity';
 import { Manager } from './managers/entities/manager.entity';
 import { Technician } from './technicians/entities/technician.entity';
 import { Receptionist } from './receptionists/entities/receptionist.entity';
@@ -26,9 +25,6 @@ export class AppService {
 
     @InjectRepository(Manager)
     private managersRepository: Repository<Manager>,
-
-    @InjectRepository(Regent)
-    private regentsRepository: Repository<Regent>,
 
     @InjectRepository(Resident)
     private residentsRepository: Repository<Resident>,

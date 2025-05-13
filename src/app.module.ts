@@ -21,7 +21,6 @@ import { ServicesModule } from './services/services.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ReceptionistsModule } from './receptionists/receptionists.module';
 import { ManagersModule } from './managers/managers.module';
-import { RegentsModule } from './regents/regents.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { VehiclesModule } from './vehicles/vehicles.module';
 import { PaymentsModule } from './payments/payments.module';
@@ -33,8 +32,8 @@ import { Accountant } from './accountants/entities/accountant.entity';
 import { Receptionist } from './receptionists/entities/receptionist.entity';
 import { Technician } from './technicians/entities/technician.entity';
 import { Manager } from './managers/entities/manager.entity';
-import { Regent } from './regents/entities/regent.entity';
 import { RepliesModule } from './replies/replies.module';
+import { TasksModule } from './tasks/tasks.module';
 
 @Module({
   imports: [
@@ -69,7 +68,7 @@ import { RepliesModule } from './replies/replies.module';
         return dataSource;
       },
     }),
-    TypeOrmModule.forFeature([Owner, Resident, Accountant, Receptionist, Technician, Manager, Regent]),
+    TypeOrmModule.forFeature([Owner, Resident, Accountant, Receptionist, Technician, Manager]),
     AccountantsModule,
     ParametersModule,
     ApartmentsModule,
@@ -82,7 +81,6 @@ import { RepliesModule } from './replies/replies.module';
     NotificationsModule,
     ReceptionistsModule,
     ManagersModule,
-    RegentsModule,
     AuthModule,
     MailerModule.forRootAsync({
       imports: [ConfigModule],
@@ -117,6 +115,7 @@ import { RepliesModule } from './replies/replies.module';
     SamplesModule,
     CommentsModule,
     RepliesModule,
+    TasksModule,
   ],
   controllers: [AppController],
   providers: [
