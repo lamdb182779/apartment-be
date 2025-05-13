@@ -151,7 +151,7 @@ export class ApartmentsService {
         }
         return acc;
       },
-      { electric: [] as number[], water: [] as number[], acreage: apartment.acreage, debt: apartment.debt }
+      { electric: [] as number[], water: [] as number[], acreage: apartment.acreage }
     )
   }
 

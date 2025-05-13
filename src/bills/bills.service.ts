@@ -25,9 +25,6 @@ export class BillsService {
       }
     })
     if (!apartment) throw new BadRequestException("Không tìm thấy số căn hộ!")
-    apartment.debt = apartment.debt + amount
-    const update = await this.apartmentsRepository.save(apartment)
-    if (update.debt !== apartment.debt) throw new BadRequestException("Không cập nhật được tổng tiền thanh toán của căn hộ!")
     const bill = await this.billsRepository.save({
       content,
       amount,

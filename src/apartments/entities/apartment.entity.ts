@@ -46,9 +46,6 @@ export class Apartment {
     @Column({ nullable: true })
     lastMaintain: Date;
 
-    @Column("decimal", { default: 0 })
-    debt: number
-
     @Column({ nullable: true })
     image: string;
 
