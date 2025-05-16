@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Request, Patch, Body } from '@nestjs/common';
+import { Controller, Get, UseGuards, Request, Patch, Body, Head } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Public } from './helpers/decorators';
 
@@ -18,7 +18,7 @@ export class AppController {
   }
 
   @Public()
-  @Get('ping')
+  @Head('ping')
   getPing() {
     return { message: "Pinged!" }
   }
