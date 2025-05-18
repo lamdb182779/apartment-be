@@ -97,7 +97,7 @@ import { TasksModule } from './tasks/tasks.module';
           },
         },
         defaults: {
-          from: '"No Reply" <no-reply@localhost>',
+          from: '"No Reply" <no-reply@buildad>',
         },
         // preview: true,
         template: {

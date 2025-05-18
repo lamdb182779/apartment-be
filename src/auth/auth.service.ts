@@ -13,6 +13,7 @@ import { Technician } from 'src/technicians/entities/technician.entity';
 import { Manager } from 'src/managers/entities/manager.entity';
 import validator from 'validator';
 import { v4 as uuidv4 } from 'uuid';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
@@ -37,7 +38,9 @@ export class AuthService {
 
         private jwtService: JwtService,
 
-        private readonly mailerService: MailerService
+        private readonly mailerService: MailerService,
+
+        private config: ConfigService
 
     ) { }
 
@@ -145,6 +148,7 @@ export class AuthService {
     }
 
     async sendVerifyEmail(id: string, role: number) {
+        const CLIENT_URL = this.config.get<string>('CLIENT_URL');
         const key = Object.keys(roles).find(key => roles[key] === role)
         if (key !== "owner" && key !== "resident") throw new BadRequestException(["Không tìm thấy mã vai trò tương ứng!"])
         const user = await this[`${key}sRepository`].findOne({
@@ -174,7 +178,8 @@ export class AuthService {
                 template: "verify",
                 context: {
                     name: user.name,
-                    verifyId
+                    verifyId,
+                    link: CLIENT_URL
                 }
             })
             .then(() => { })
@@ -362,6 +367,7 @@ export class AuthService {
     }
 
     async forgetUsername(email: string, id: number) {
+        const CLIENT_URL = this.config.get<string>('CLIENT_URL');
         if (!validator.isEmail(email)) throw new BadRequestException(["Email phải đúng định dạng example@example"])
         const key = Object.keys(roles).find(key => roles[key] === id)
         if (!key) throw new BadRequestException(["Không tìm thấy mã vai trò tương ứng!"])
@@ -379,7 +385,8 @@ export class AuthService {
                 template: "fgusername",
                 context: {
                     name: user.name,
-                    username: user.username
+                    username: user.username,
+                    link: CLIENT_URL
                 }
             })
             .then()
@@ -392,6 +399,7 @@ export class AuthService {
     }
 
     async sendLinkEmail(email: string, id: number) {
+        const CLIENT_URL = this.config.get<string>('CLIENT_URL');
         const key = Object.keys(roles).find(key => roles[key] === id)
         if (!key) throw new BadRequestException(["Không tìm thấy mã vai trò tương ứng!"])
         if (!validator.isEmail(email)) throw new BadRequestException(["Email phải đúng định dạng example@example"])
@@ -414,7 +422,8 @@ export class AuthService {
                 template: "fgpassword",
                 context: {
                     name: user.name,
-                    link: `${process.env.CLIENT_URL}/reset?code=${code}&id=${user.id}&role=${user.role}`
+                    link: `${CLIENT_URL}/reset?code=${code}&id=${user.id}&role=${user.role}`,
+                    linkhome: CLIENT_URL
                 }
             })
             .then()

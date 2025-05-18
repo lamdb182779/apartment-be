@@ -101,6 +101,7 @@ export class PaymentsService {
   }
 
   async updateOrderStatus(txnRef: string, status: 'success' | 'failed', res) {
+    const CLIENT_URL = this.config.get<string>('CLIENT_URL')
     const payment = await this.paymentsRepository.findOneBy({ id: txnRef })
     if (payment) {
       if (status === 'success') {
@@ -111,7 +112,7 @@ export class PaymentsService {
       const update = await this.paymentsRepository.update(txnRef, { status })
       if (update.affected === 0) console.log(`Không thể cập nhật trạng thái thanh toán ${txnRef} thành ${status}!`)
       else console.log(`Cập nhật trạng thái thanh toán ${txnRef} thành ${status} thành công`);
-      return res.redirect(`http://localhost:3000/customer/bills/?status=${status}&billId=${payment.id}`);
+      return res.redirect(`${CLIENT_URL}/customer/bills/?status=${status}&billId=${payment.id}`);
     }
     else console.log("Không tìm thấy mã thanh toán tương ứng!")
   }
