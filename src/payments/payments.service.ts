@@ -50,10 +50,10 @@ export class PaymentsService {
     const expiredDate = format(add(new Date(), { minutes: 15 }), 'yyyyMMddHHmmss')
 
     const ipAddr =
-      // req.headers['x-forwarded-for'] ||
-      // req.connection.remoteAddress ||
-      // req.socket.remoteAddress ||
-      // req.connection.socket.remoteAddress ||
+      req.headers['x-forwarded-for'] ||
+      req.connection.remoteAddress ||
+      req.socket.remoteAddress ||
+      req.connection.socket.remoteAddress ||
       "127.0.0.1";
 
     const params = {
