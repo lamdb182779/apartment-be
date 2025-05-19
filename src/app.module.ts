@@ -34,6 +34,7 @@ import { Technician } from './technicians/entities/technician.entity';
 import { Manager } from './managers/entities/manager.entity';
 import { RepliesModule } from './replies/replies.module';
 import { TasksModule } from './tasks/tasks.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -116,6 +117,7 @@ import { TasksModule } from './tasks/tasks.module';
     CommentsModule,
     RepliesModule,
     TasksModule,
+    ScheduleModule.forRoot()
   ],
   controllers: [AppController],
   providers: [

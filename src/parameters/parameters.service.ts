@@ -5,6 +5,7 @@ import { Parameter } from './entities/parameter.entity';
 import { Between, Repository } from 'typeorm';
 import { Apartment } from 'src/apartments/entities/apartment.entity';
 import { format, isBefore, setDate, startOfMonth, subDays, subMonths } from 'date-fns';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class ParametersService {
@@ -15,9 +16,11 @@ export class ParametersService {
     @InjectRepository(Apartment)
     private apartmentsRepository: Repository<Apartment>
   ) { }
-  async create() {
+
+  @Cron('0 0 0 25 * *')
+  async handleCron() {
     const types = ["electric", "water"]
-    const month = new Date("2025-4-25")
+    const month = new Date()
     const apartments = await this.apartmentsRepository
       .createQueryBuilder('apartment')
       .where(`apartment.owner IS NOT NULL`)
@@ -40,6 +43,9 @@ export class ParametersService {
       waterErrors.length > 0 && `Không thể thêm chỉ số điện cho căn hộ ${waterErrors.join(", ")}!`,
     ])
     return { message: "Cập nhật thành công" }
+  }
+
+  async create() {
   }
 
   async findAll(time: string, floor: number) {

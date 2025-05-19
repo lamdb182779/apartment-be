@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Resident } from './residents/entities/resident.entity';
@@ -29,9 +29,7 @@ export class AppService {
     @InjectRepository(Resident)
     private residentsRepository: Repository<Resident>,
   ) { }
-  getHello(): string {
-    return 'Hello World!';
-  }
+
   async updateAvatar(user, image: string) {
     const key = Object.keys(roles).find(key => roles[key] === user.role)
     if (!key) throw new BadRequestException(["Không tìm thấy mã vai trò tương ứng!"])

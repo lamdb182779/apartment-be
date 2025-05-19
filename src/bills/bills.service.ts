@@ -3,10 +3,13 @@ import { CreateBillDto } from './dto/create-bill.dto';
 import { UpdateBillDto } from './dto/update-bill.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Apartment } from 'src/apartments/entities/apartment.entity';
-import { Repository } from 'typeorm';
+import { Between, LessThan, Repository } from 'typeorm';
 import { Bill } from './entities/bill.entity';
 import { addDays, startOfDay } from 'date-fns';
 import { roles } from 'src/helpers/utils';
+import { Cron } from '@nestjs/schedule';
+import { MailerService } from '@nestjs-modules/mailer';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class BillsService {
@@ -15,8 +18,117 @@ export class BillsService {
     private billsRepository: Repository<Bill>,
 
     @InjectRepository(Apartment)
-    private apartmentsRepository: Repository<Apartment>
+    private apartmentsRepository: Repository<Apartment>,
+
+    private readonly mailerService: MailerService,
+
+    private config: ConfigService
   ) { }
+
+  @Cron('0 0 9 * * *')
+  async handleCron() {
+    const CLIENT_URL = this.config.get<string>('CLIENT_URL');
+    const now = new Date()
+    const afterAWeek = addDays(now, 7)
+    const expiredBills = await this.billsRepository.find({
+      where: {
+        expired: LessThan(now)
+      },
+      relations: ["apartment", "apartment.owner", "apartment.residents"]
+    })
+    if (expiredBills?.length > 0) {
+      expiredBills.forEach(({ apartment, id, amount, expired }) => {
+        this.mailerService
+          .sendMail({
+            to: apartment.owner.email,
+            subject: 'Thông báo hóa đơn đã quá hạn',
+            text: 'Remind',
+            template: "remind",
+            context: {
+              name: apartment.owner.name,
+              type: "đã quá hạn",
+              link: CLIENT_URL,
+              id,
+              amount,
+              expired
+            }
+          })
+          .then(() => { })
+          .catch(() => { });
+        if (apartment?.residents?.length > 0) {
+          apartment.residents.forEach(({ email, name }) => {
+            this.mailerService
+              .sendMail({
+                to: email,
+                subject: 'Thông báo hóa đơn đã quá hạn',
+                text: 'Remind',
+                template: "remind",
+                context: {
+                  name: name,
+                  type: "đã quá hạn",
+                  link: CLIENT_URL,
+                  id,
+                  amount: amount.toLocaleString("vi"),
+                  expired: expired.toLocaleString("vi")
+                }
+              })
+              .then(() => { })
+              .catch(() => { });
+          })
+        }
+      })
+    }
+
+    const expiredSoonBills = await this.billsRepository.find({
+      where: {
+        expired: Between(now, afterAWeek)
+      },
+      relations: ["apartment", "apartment.owner", "apartment.residents"]
+    })
+    if (expiredSoonBills?.length > 0) {
+      expiredSoonBills.forEach(({ apartment, id, amount, expired }) => {
+        this.mailerService
+          .sendMail({
+            to: apartment.owner.email,
+            subject: 'Thông báo hóa đơn sắp đến hạn',
+            text: 'Remind',
+            template: "remind",
+            context: {
+              name: apartment.owner.name,
+              type: "sắp đến hạn",
+              link: CLIENT_URL,
+              id,
+              amount,
+              expired
+            }
+          })
+          .then(() => { })
+          .catch(() => { });
+        if (apartment?.residents?.length > 0) {
+          apartment.residents.forEach(({ email, name }) => {
+            this.mailerService
+              .sendMail({
+                to: email,
+                subject: 'Thông báo hóa đơn sắp đến hạn',
+                text: 'Remind',
+                template: "remind",
+                context: {
+                  name: name,
+                  type: "sắp đến hạn",
+                  link: CLIENT_URL,
+                  id,
+                  amount,
+                  expired
+                }
+              })
+              .then(() => { })
+              .catch(() => { });
+          })
+        }
+      })
+    }
+  }
+
   async create(createBillDto: CreateBillDto) {
     const { title, id, type, amount, content, number } = createBillDto
     const apartment = await this.apartmentsRepository.findOne({
