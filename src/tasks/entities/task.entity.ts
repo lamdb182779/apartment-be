@@ -48,12 +48,6 @@ export class TaskUser {
     @ManyToOne(() => Technician, technician => technician.tasks, { nullable: true, onDelete: "SET NULL" })
     technician: Technician
 
-    @Column({ default: false })
-    isRead: boolean;
-
-    @CreateDateColumn({ nullable: true })
-    readAt: Date;
-
     @CreateDateColumn()
     createdAt: Date
 
