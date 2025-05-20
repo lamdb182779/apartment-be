@@ -1,4 +1,4 @@
-import { Task } from 'src/tasks/entities/task.entity';
+import { TaskUser } from 'src/tasks/entities/task.entity';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn, ManyToMany } from 'typeorm';
 
 @Entity()
@@ -33,8 +33,8 @@ export class Accountant {
     @Column({ nullable: true, select: false })
     resetCode: string;
 
-    @ManyToMany(() => Task, task => task.accountants)
-    tasks: Task[]
+    @OneToMany(() => TaskUser, task => task.accountant)
+    tasks: TaskUser[]
 
     @CreateDateColumn()
     createdAt: Date
