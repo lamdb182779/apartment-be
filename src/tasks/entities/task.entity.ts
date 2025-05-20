@@ -1,9 +1,8 @@
 import { Accountant } from "src/accountants/entities/accountant.entity";
 import { Receptionist } from "src/receptionists/entities/receptionist.entity";
 import { Technician } from "src/technicians/entities/technician.entity";
-import { Check, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Check, Column, CreateDateColumn, Entity, JoinColumn, ManyToMany, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
-@Check(`("receptionistId" IS NOT NULL AND "accountantId" IS NULL AND "technicianId" IS NULL) OR ("receptionistId" IS NULL AND "accountantId" IS NOT NULL AND "technicianId" IS NULL) OR ("receptionistId" IS NULL AND "accountantId" IS NULL AND "technicianId" IS NOT NULL) OR ("receptionistId" IS NULL AND "accountantId" IS NULL AND "technicianId" IS NULL)`)
 @Entity()
 export class Task {
     @PrimaryGeneratedColumn("uuid")
@@ -21,17 +20,14 @@ export class Task {
     @Column()
     deadline: Date
 
-    @JoinColumn()
-    @ManyToOne(() => Receptionist, receptionist => receptionist.tasks, { nullable: true, onDelete: "SET NULL" })
-    receptionist: Receptionist
+    @ManyToMany(() => Receptionist, receptionist => receptionist.tasks)
+    receptionists: Receptionist[]
 
-    @JoinColumn()
-    @ManyToOne(() => Accountant, accountant => accountant.tasks, { nullable: true, onDelete: "SET NULL" })
-    accountant: Accountant
+    @ManyToMany(() => Accountant, accountant => accountant.tasks)
+    accountants: Accountant[]
 
-    @JoinColumn()
-    @ManyToOne(() => Technician, technician => technician.tasks, { nullable: true, onDelete: "SET NULL" })
-    technician: Technician
+    @ManyToMany(() => Technician, technician => technician.tasks)
+    technicians: Technician[]
 
     @CreateDateColumn()
     createdAt: Date
