@@ -10,6 +10,9 @@ import { Payment } from './entities/payment.entity';
 import { Bill } from 'src/bills/entities/bill.entity';
 import { add, format } from 'date-fns';
 import { sortObject } from 'src/helpers/utils';
+import { toZonedTime } from 'date-fns-tz';
+
+const timeZone = 'Asia/Ho_Chi_Minh';
 
 @Injectable()
 export class PaymentsService {
@@ -46,9 +49,10 @@ export class PaymentsService {
     const vnp_HashSecret = this.config.get<string>('VNP_HASH_SECRET');
     const vnp_Url = this.config.get<string>('VNP_URL');
     const vnp_ReturnUrl = this.config.get<string>('VNP_RETURN_URL') + `${mobile === "true" ? "?mobile=true" : ""}`;
+    const now = toZonedTime(new Date(), timeZone)
 
-    const createDate = format(new Date(), 'yyyyMMddHHmmss')
-    const expiredDate = format(add(new Date(), { minutes: 15 }), 'yyyyMMddHHmmss')
+    const createDate = format(now, 'yyyyMMddHHmmss')
+    const expiredDate = format(add(now, { minutes: 15 }), 'yyyyMMddHHmmss')
 
     const ipAddr =
       req.headers['x-forwarded-for'] ||
@@ -79,9 +83,6 @@ export class PaymentsService {
     let signed = hmac.update(Buffer.from(signData, 'utf8')).digest('hex')
     sortedParams['vnp_SecureHash'] = signed
     const finalUrl = `${vnp_Url}?${qs.stringify(sortedParams, { encode: false })}`;
-    console.log(finalUrl);
-
-
     return finalUrl;
   }
 
