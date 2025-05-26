@@ -31,20 +31,21 @@ export class PaymentsController {
   async handleIpn(@Query() query, @Res() res: Response) {
     const CLIENT_URL = this.config.get<string>('CLIENT_URL')
     try {
-      const { vnp_ResponseCode, vnp_TxnRef, mobile } = query;
+      const { vnp_ResponseCode, vnp_TxnRef, mobile, vnp_OrderInfo } = query;
+      const id = vnp_OrderInfo.split("don hang ")[1]
 
       const verified = this.paymentsService.verifyVnpaySignature(query);
 
       if (!verified) {
         this.logger.warn('Chữ ký sai từ VNPAY');
-        if (mobile === "true") return res.redirect(`${CLIENT_URL}/mobile/bills?status=error`)
+        if (mobile === "true") return res.redirect(`${CLIENT_URL}/mobile/bills/${id}?status=error`)
         return res.redirect(`${CLIENT_URL}/customer/bills?status=error`)
       }
 
       if (vnp_ResponseCode === '00') {
-        return this.paymentsService.updateOrderStatus(vnp_TxnRef, 'success', res, mobile);
+        return this.paymentsService.updateOrderStatus(vnp_TxnRef, 'success', res, id, mobile);
       } else {
-        return this.paymentsService.updateOrderStatus(vnp_TxnRef, 'failed', res, mobile);
+        return this.paymentsService.updateOrderStatus(vnp_TxnRef, 'failed', res, id, mobile);
       }
     } catch (err) {
       this.logger.error('Lỗi điều khiển VNP IPN', err);
