@@ -123,12 +123,19 @@ export class ServicesService {
 
   async update(id: string, updateServiceDto: UpdateServiceDto) {
     const { number, ...rest } = updateServiceDto
-    const apartment = await this.apartmentsRepository.findOneBy({ number })
+    if (number) {
+      const apartment = await this.apartmentsRepository.findOneBy({ number })
+      const service = await this.servicesRepository.update({
+        id
+      }, { ...rest, apartment })
+
+      return { message: "Cập nhật thành công" };
+    }
     const service = await this.servicesRepository.update({
       id
-    }, { ...rest, apartment })
-
+    }, { ...rest })
     return { message: "Cập nhật thành công" };
+
   }
 
   remove(id: string) {
