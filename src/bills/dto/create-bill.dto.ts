@@ -13,7 +13,7 @@ export class CreateBillDto {
     @IsString({ message: "Loại hóa đơn phải là một chuỗi văn bản!" })
     type: string;
 
-    @IsOptional()
+    @IsNotEmpty({ message: "Tiêu đề không được để trống!" })
     @IsString({ message: "Tiêu đề phải là một chuỗi văn bản!" })
     title: string;
 

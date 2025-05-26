@@ -27,6 +27,7 @@ export class PaymentsService {
     const vnp_SecureHash = query.vnp_SecureHash;
     delete query.vnp_SecureHash;
     delete query.vnp_SecureHashType;
+    delete query.mobile;
 
     const sortedQuery = sortObject(query);;
 
@@ -40,11 +41,11 @@ export class PaymentsService {
   }
 
 
-  createPaymentUrl(orderId: string, amount: number, req, id: string): string {
+  createPaymentUrl(orderId: string, amount: number, req, id: string, mobile?: string): string {
     const vnp_TmnCode = this.config.get<string>('VNP_TMN_CODE');
     const vnp_HashSecret = this.config.get<string>('VNP_HASH_SECRET');
     const vnp_Url = this.config.get<string>('VNP_URL');
-    const vnp_ReturnUrl = this.config.get<string>('VNP_RETURN_URL');
+    const vnp_ReturnUrl = this.config.get<string>('VNP_RETURN_URL') + `${mobile === "true" ? "?mobile=true" : ""}`;
 
     const createDate = format(new Date(), 'yyyyMMddHHmmss')
     const expiredDate = format(add(new Date(), { minutes: 15 }), 'yyyyMMddHHmmss')
@@ -78,11 +79,13 @@ export class PaymentsService {
     let signed = hmac.update(Buffer.from(signData, 'utf8')).digest('hex')
     sortedParams['vnp_SecureHash'] = signed
     const finalUrl = `${vnp_Url}?${qs.stringify(sortedParams, { encode: false })}`;
+    console.log(finalUrl);
+
 
     return finalUrl;
   }
 
-  async create(createPaymentDto: CreatePaymentDto, req) {
+  async create(createPaymentDto: CreatePaymentDto, req, mobile?: string) {
     const { orderId } = createPaymentDto
     const bill = await this.billsRepository.findOne({
       where: {
@@ -96,11 +99,11 @@ export class PaymentsService {
       orderId,
       amount,
     });
-    const url = this.createPaymentUrl(orderId, amount, req, payment.id);
+    const url = this.createPaymentUrl(orderId, amount, req, payment.id, mobile);
     return { url, message: "Đang chuyển hướng trang thanh toán" }
   }
 
-  async updateOrderStatus(txnRef: string, status: 'success' | 'failed', res) {
+  async updateOrderStatus(txnRef: string, status: 'success' | 'failed', res, mobile?: string) {
     const CLIENT_URL = this.config.get<string>('CLIENT_URL')
     const payment = await this.paymentsRepository.findOneBy({ id: txnRef })
     if (payment) {
@@ -112,6 +115,7 @@ export class PaymentsService {
       const update = await this.paymentsRepository.update(txnRef, { status })
       if (update.affected === 0) console.log(`Không thể cập nhật trạng thái thanh toán ${txnRef} thành ${status}!`)
       else console.log(`Cập nhật trạng thái thanh toán ${txnRef} thành ${status} thành công`);
+      if (mobile === "true") return res.redirect(`${CLIENT_URL}/mobile/bills/?status=${status}&billId=${payment.id}`);
       return res.redirect(`${CLIENT_URL}/customer/bills/?status=${status}&billId=${payment.id}`);
     }
     else console.log("Không tìm thấy mã thanh toán tương ứng!")

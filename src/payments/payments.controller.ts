@@ -15,9 +15,10 @@ export class PaymentsController {
     private config: ConfigService
   ) { }
 
+  @Public()
   @Post()
-  create(@Body() createPaymentDto: CreatePaymentDto, @Req() req: Request) {
-    return this.paymentsService.create(createPaymentDto, req);
+  create(@Body() createPaymentDto: CreatePaymentDto, @Query() query, @Req() req: Request) {
+    return this.paymentsService.create(createPaymentDto, req, query?.mobile);
   }
 
   @Get()
@@ -30,19 +31,20 @@ export class PaymentsController {
   async handleIpn(@Query() query, @Res() res: Response) {
     const CLIENT_URL = this.config.get<string>('CLIENT_URL')
     try {
+      const { vnp_ResponseCode, vnp_TxnRef, mobile } = query;
+
       const verified = this.paymentsService.verifyVnpaySignature(query);
 
       if (!verified) {
         this.logger.warn('Chữ ký sai từ VNPAY');
+        if (mobile === "true") return res.redirect(`${CLIENT_URL}/mobile/bills?status=error`)
         return res.redirect(`${CLIENT_URL}/customer/bills?status=error`)
       }
 
-      const { vnp_ResponseCode, vnp_TxnRef } = query;
-
       if (vnp_ResponseCode === '00') {
-        return this.paymentsService.updateOrderStatus(vnp_TxnRef, 'success', res);
+        return this.paymentsService.updateOrderStatus(vnp_TxnRef, 'success', res, mobile);
       } else {
-        return this.paymentsService.updateOrderStatus(vnp_TxnRef, 'failed', res);
+        return this.paymentsService.updateOrderStatus(vnp_TxnRef, 'failed', res, mobile);
       }
     } catch (err) {
       this.logger.error('Lỗi điều khiển VNP IPN', err);

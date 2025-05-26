@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Request } fro
 import { BillsService } from './bills.service';
 import { CreateBillDto } from './dto/create-bill.dto';
 import { UpdateBillDto } from './dto/update-bill.dto';
-import { Roles } from 'src/helpers/decorators';
+import { Public, Roles } from 'src/helpers/decorators';
 
 @Controller('bills')
 export class BillsController {
@@ -31,6 +31,7 @@ export class BillsController {
     return this.billsService.findByOwner(id);
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.billsService.findOne(id);

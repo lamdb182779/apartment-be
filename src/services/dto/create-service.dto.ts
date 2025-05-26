@@ -13,7 +13,7 @@ export class CreateServiceDto {
     @IsNotEmpty({ message: "Ngày kết thúc không được để trống!" })
     endDate: Date;
 
-    @IsNotEmpty({ message: "Loại yêu cầu không được để trống!" })
+    @IsNotEmpty({ message: "Khu vực không được để trống!" })
     @IsString({ message: "Khu vực phải là một chuỗi văn bản!" })
     area: string;
 

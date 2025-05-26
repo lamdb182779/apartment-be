@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Request } fro
 import { NotificationsService } from './notifications.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
-import { Roles } from 'src/helpers/decorators';
+import { Public, Roles } from 'src/helpers/decorators';
 
 @Controller('notifications')
 export class NotificationsController {
@@ -29,7 +29,7 @@ export class NotificationsController {
     return this.notificationsService.findAllByUser(+current, +pageSize, user);
   }
 
-  @Roles("manager", "receptionist")
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.notificationsService.findOne(id);
