@@ -52,12 +52,6 @@ export class ApartmentsController {
     return this.apartmentsService.tenantLookingNumber(+number)
   }
 
-  @Get('nearest')
-  findNearest(@Query() query: Record<string, string>) {
-    const { number, time } = query
-    return this.apartmentsService.findNearest(+number, time)
-  }
-
   @Get(':number')
   findOne(@Param('number') number: string) {
     return this.apartmentsService.findOne(+number);

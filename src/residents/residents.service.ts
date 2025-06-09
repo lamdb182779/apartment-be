@@ -84,6 +84,7 @@ export class ResidentsService {
       },
       relations: ["parameters", "residents", "rooms"]
     })
+    if (!apartment) throw new NotFoundException(["Không tìm thấy căn hộ đang ở!"])
     const { updatedAt, createdAt, parameters, residents, rooms, ...result } = apartment
     return {
       ...result, parameters: parameters.reduce((acc, parameter) => {

@@ -2,16 +2,20 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { UpdateParameterDto } from './dto/update-parameter.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Parameter } from './entities/parameter.entity';
-import { Between, Repository } from 'typeorm';
+import { Between, In, Repository } from 'typeorm';
 import { Apartment } from 'src/apartments/entities/apartment.entity';
-import { format, isBefore, setDate, startOfMonth, subDays, subMonths } from 'date-fns';
+import { endOfMonth, format, isBefore, setDate, startOfMonth, subDays, subMonths } from 'date-fns';
 import { Cron } from '@nestjs/schedule';
+import { Bill } from 'src/bills/entities/bill.entity';
 
 @Injectable()
 export class ParametersService {
   constructor(
     @InjectRepository(Parameter)
     private parametersRepository: Repository<Parameter>,
+
+    @InjectRepository(Bill)
+    private billsRepository: Repository<Bill>,
 
     @InjectRepository(Apartment)
     private apartmentsRepository: Repository<Apartment>
@@ -67,6 +71,81 @@ export class ParametersService {
       acc[parameter.number].push(parameter)
       return acc
     }, []).filter(Boolean);
+  }
+
+  async findAllMonthBill(time: string, floor: number) {
+    const preParaDate = isBefore(new Date(), setDate(startOfMonth(new Date()), 25)) ? setDate(startOfMonth(subMonths(new Date(), 1)), 25) : setDate(startOfMonth(new Date()), 25)
+    const month = (new Date(time)).getDate() === 25 ? new Date(time) : preParaDate
+    const parameters = await this.parametersRepository.find({
+      where: {
+        month,
+        apartment: {
+          floor,
+        }
+      },
+      relations: ["apartment"],
+    })
+
+    const grouped = parameters.reduce((acc, para) => {
+      const number = para.apartment.number;
+      if (!acc[number]) acc[number] = [];
+      acc[number].push(para);
+      return acc;
+    }, {} as Record<number, typeof parameters>);
+
+    const results = await Promise.all(
+      Object.entries(grouped).map(async ([numberStr, paras]) => {
+        const number = parseInt(numberStr);
+        const apartmentNumber = paras[0].apartment.number;
+
+        const billsExist = await this.billsRepository.exists({
+          where: {
+            apartment: { number: apartmentNumber },
+            title: `Hóa đơn dịch vụ điện nước tháng ${format(month, "MM/yyyy")}`,
+            type: "Dịch vụ hàng tháng",
+          },
+        });
+
+        const electric = paras.find((p) => p.type === "electric")?.value ?? null;
+        const water = paras.find((p) => p.type === "water")?.value ?? null;
+
+        return {
+          number,
+          hasBill: billsExist,
+          electric,
+          water,
+        };
+      })
+    );
+    return results;
+  }
+
+  async findNearest(number: number, time: string) {
+    if (!number || isNaN(number)) throw new BadRequestException("Không rõ số nhà!")
+    const date = new Date(time)
+    let current25th = setDate(date, 25);
+    if (isBefore(date, current25th)) {
+      current25th = setDate(subDays(current25th, 1), 25);
+    }
+    const parameters = await this.parametersRepository.find({
+      where: {
+        month: In([current25th, subMonths(current25th, 1)]),
+        apartment: {
+          number
+        }
+      },
+    })
+
+    const res = ['electric', 'water'].reduce((acc, type) => {
+      const [cur, pre] = parameters
+        .filter(p => p.type === type)
+        .sort((a, b) => new Date(b.month).getTime() - new Date(a.month).getTime())
+        .map(p => p.value);
+
+      acc[type] = { cur, pre };
+      return acc;
+    }, {} as Record<string, { cur: number, pre: number }>)
+    return res
   }
 
   findOne(id: string) {

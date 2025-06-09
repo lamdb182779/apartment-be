@@ -100,7 +100,7 @@ export class ApartmentsService {
       select: ["owner"],
       relations: ["owner"]
     })
-    return apartment.owner.name
+    return { name: apartment.owner.name, acreage: apartment.acreage }
   }
 
   async tenantLooking() {
@@ -123,36 +123,6 @@ export class ApartmentsService {
       relations: ["rooms", "owner"]
     })
     return rentalaApt
-  }
-
-  async findNearest(number: number, time: string) {
-    if (!number || isNaN(number)) throw new BadRequestException("Không rõ số nhà!")
-    const date = new Date(time)
-    let current25th = setDate(date, 25);
-    if (isBefore(date, current25th)) {
-      current25th = setDate(subDays(current25th, 1), 25);
-    }
-    const apartment = await this.apartmentsRepository.findOne({
-      where: {
-        number,
-        parameters: {
-          month: Between(subMonths(current25th, 2), current25th)
-        }
-      },
-      relations: ["parameters"]
-    })
-
-    return apartment.parameters.reduce(
-      (acc, item) => {
-        if (item.type === "electric") {
-          acc.electric.push(item.value);
-        } else if (item.type === "water") {
-          acc.water.push(item.value);
-        }
-        return acc;
-      },
-      { electric: [] as number[], water: [] as number[], acreage: apartment.acreage }
-    )
   }
 
   update(number: number, updateApartmentDto: UpdateApartmentDto) {

@@ -20,6 +20,18 @@ export class ParametersController {
     return this.parametersService.findAll(month, +floor);
   }
 
+  @Get("bill")
+  findAllMonthBill(@Query() query: Record<string, string>) {
+    const { month, floor } = query
+    return this.parametersService.findAllMonthBill(month, +floor);
+  }
+
+  @Get('nearest')
+  findNearest(@Query() query: Record<string, string>) {
+    const { number, time } = query
+    return this.parametersService.findNearest(+number, time)
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.parametersService.findOne(id);
