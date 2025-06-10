@@ -17,8 +17,8 @@ export class BillsController {
   @Roles("manager", "accountant")
   @Get()
   findAll(@Query() query: Record<string, string>) {
-    const { month, floor } = query
-    return this.billsService.findAll(month, +floor);
+    const { month, current, pageSize } = query
+    return this.billsService.findAll(month, +current, +pageSize);
   }
 
   @Get('self')

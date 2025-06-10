@@ -3,7 +3,7 @@ import { CreateApartmentDto } from './dto/create-apartment.dto';
 import { UpdateApartmentDto } from './dto/update-apartment.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Apartment } from './entities/apartment.entity';
-import { Between, IsNull, Not, Repository } from 'typeorm';
+import { Between, Equal, IsNull, Not, Or, Repository } from 'typeorm';
 import { addMonths, isBefore, setDate, startOfMonth, subDays, subMonths } from 'date-fns';
 import { Room } from 'src/rooms/entities/room.entity';
 import { roles } from 'src/helpers/utils';
@@ -45,16 +45,19 @@ export class ApartmentsService {
 
   async findOne(number: number) {
     const now = new Date()
-    const apartment = await this.apartmentsRepository.findOne({
-      where: {
-        number,
-        parameters: {
-          month: Between(subMonths(now, 6), now),
-          value: Not(IsNull())
-        },
-      },
-      relations: ["parameters", "residents", "rooms"]
-    })
+    const apartment = await this.apartmentsRepository
+      .createQueryBuilder("apartment")
+      .leftJoinAndSelect("apartment.parameters", "parameter", `
+    parameter.month BETWEEN :from AND :to AND parameter.value IS NOT NULL
+  `)
+      .leftJoinAndSelect("apartment.residents", "resident")
+      .leftJoinAndSelect("apartment.rooms", "room")
+      .where("apartment.number = :number", { number })
+      .setParameters({
+        from: subMonths(now, 6),
+        to: now,
+      })
+      .getOne()
     const { updatedAt, createdAt, parameters, residents, rooms, ...result } = apartment
     return {
       ...result, parameters: parameters.reduce((acc, parameter) => {
