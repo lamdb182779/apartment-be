@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Accountant } from 'src/accountants/entities/accountant.entity';
-import { comparePassword, generateSecureOtp, getName, hashPassword, maskEmail, roles } from 'src/helpers/utils';
+import { comparePassword, generateSecureOtp, getName, hashPassword, hasLetterNumber, maskEmail, roles } from 'src/helpers/utils';
 import { Owner } from 'src/owners/entities/owner.entity';
 import { Resident } from 'src/residents/entities/resident.entity';
 import { Repository } from 'typeorm';
@@ -237,6 +237,8 @@ export class AuthService {
     }
 
     async changePassword(user, newPassword: string, currentPassword: string) {
+        if (newPassword.length < 6) throw new BadRequestException(["Mật khẩu cần có ít nhất 6 ký tự!"])
+        if (!hasLetterNumber(newPassword)) throw new BadRequestException(["Mật khẩu cần bao gồm cả chữ số và chữ cái!"])
         const key = Object.keys(roles).find(key => roles[key] === user.role)
         if (!key) throw new BadRequestException(["Không tìm thấy mã vai trò tương ứng!"])
         switch (key) {
@@ -436,6 +438,8 @@ export class AuthService {
     }
 
     async resetPassword(id: string, role: number, code: string, password: string) {
+        if (password.length < 6) throw new BadRequestException(["Mật khẩu cần có ít nhất 6 ký tự!"])
+        if (!hasLetterNumber(password)) throw new BadRequestException(["Mật khẩu cần bao gồm cả chữ số và chữ cái!"])
         const key = Object.keys(roles).find(key => roles[key] === role)
         if (!key) throw new BadRequestException(["Không tìm thấy mã vai trò tương ứng!"])
         const user = await this[`${key}sRepository`].findOne({

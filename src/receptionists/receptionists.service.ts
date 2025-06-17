@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateReceptionistDto } from './dto/create-receptionist.dto';
 import { UpdateReceptionistDto } from './dto/update-receptionist.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -59,11 +59,43 @@ export class ReceptionistsService {
     return `This action returns a #${id} receptionist`;
   }
 
-  update(id: string, updateReceptionistDto: UpdateReceptionistDto) {
-    return `This action updates a #${id} receptionist`;
+  async update(id: string, updateReceptionistDto: UpdateReceptionistDto) {
+    const receptionist = await this.receptionistsRepository.findOne({
+      where: {
+        id
+      },
+    })
+    if (!receptionist) throw new NotFoundException([`Không tìm thấy chủ hộ mã số ${id}!`])
+    const { name, email, phone } = updateReceptionistDto
+    if (email !== receptionist.email) {
+      const existingEmail = await this.receptionistsRepository.findOne({ where: { email } })
+      if (existingEmail) throw new BadRequestException([`Email ${email} đã tồn tại, vui lòng kiểm tra lại!`])
+    }
+    const update = await this.receptionistsRepository.update(id, {
+      name, email, phone
+    })
+    return { message: "Cập nhật thành công" }
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} receptionist`;
+  async reactive(id: string) {
+    const update = await this.receptionistsRepository.update(id, {
+      active: true
+    })
+    if (update.affected === 0) throw new BadRequestException(["Không thể ngừng hoạt động quản lý viên với mã số này!"])
+    return ({ message: "Khôi phục thành công" })
+  }
+
+  async deactive(id: string) {
+    const update = await this.receptionistsRepository.update(id, {
+      active: false
+    })
+    if (update.affected === 0) throw new BadRequestException(["Không thể ngừng hoạt động quản lý viên với mã số này!"])
+    return ({ message: "Ngừng hoạt động thành công" })
+  }
+
+  async remove(id: string) {
+    const del = await this.receptionistsRepository.delete(id)
+    if (del.affected === 0) throw new BadRequestException(["Không thể xóa thông tin!"])
+    return ({ message: "Xóa thông tin thành công" })
   }
 }

@@ -117,6 +117,10 @@ export const sortObject = (obj) => {
     return sorted;
 }
 
+export const hasLetterNumber = (pw: string) => {
+    return /[a-zA-Z]/.test(pw) && /[0-9]/.test(pw)
+}
+
 
 
 

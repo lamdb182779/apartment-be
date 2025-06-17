@@ -3,6 +3,7 @@ import { AccountantsService } from './accountants.service';
 import { CreateAccountantDto } from './dto/create-accountant.dto';
 import { UpdateAccountantDto } from './dto/update-accountant.dto';
 import { Roles } from 'src/helpers/decorators';
+import { IdParamDto } from 'src/helpers/utils';
 
 @Controller('accountants')
 export class AccountantsController {
@@ -24,6 +25,18 @@ export class AccountantsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.accountantsService.findOne(id);
+  }
+
+  @Roles("manager")
+  @Patch('deactive/:id')
+  deactive(@Param() param: IdParamDto) {
+    return this.accountantsService.deactive(param.id)
+  }
+
+  @Roles("manager")
+  @Patch('reactive/:id')
+  reactive(@Param() param: IdParamDto) {
+    return this.accountantsService.reactive(param.id)
   }
 
   @Patch(':id')

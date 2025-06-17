@@ -3,6 +3,7 @@ import { TechniciansService } from './technicians.service';
 import { CreateTechnicianDto } from './dto/create-technician.dto';
 import { UpdateTechnicianDto } from './dto/update-technician.dto';
 import { Roles } from 'src/helpers/decorators';
+import { IdParamDto } from 'src/helpers/utils';
 
 @Controller('technicians')
 export class TechniciansController {
@@ -24,6 +25,18 @@ export class TechniciansController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.techniciansService.findOne(id);
+  }
+
+  @Roles("manager")
+  @Patch('deactive/:id')
+  deactive(@Param() param: IdParamDto) {
+    return this.techniciansService.deactive(param.id)
+  }
+
+  @Roles("manager")
+  @Patch('reactive/:id')
+  reactive(@Param() param: IdParamDto) {
+    return this.techniciansService.reactive(param.id)
   }
 
   @Patch(':id')

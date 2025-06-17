@@ -3,6 +3,7 @@ import { ReceptionistsService } from './receptionists.service';
 import { CreateReceptionistDto } from './dto/create-receptionist.dto';
 import { UpdateReceptionistDto } from './dto/update-receptionist.dto';
 import { Roles } from 'src/helpers/decorators';
+import { IdParamDto } from 'src/helpers/utils';
 
 @Controller('receptionists')
 export class ReceptionistsController {
@@ -24,6 +25,18 @@ export class ReceptionistsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.receptionistsService.findOne(id);
+  }
+
+  @Roles("manager")
+  @Patch('deactive/:id')
+  deactive(@Param() param: IdParamDto) {
+    return this.receptionistsService.deactive(param.id)
+  }
+
+  @Roles("manager")
+  @Patch('reactive/:id')
+  reactive(@Param() param: IdParamDto) {
+    return this.receptionistsService.reactive(param.id)
   }
 
   @Patch(':id')

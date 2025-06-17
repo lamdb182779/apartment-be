@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAccountantDto } from './dto/create-accountant.dto';
 import { UpdateAccountantDto } from './dto/update-accountant.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -59,11 +59,43 @@ export class AccountantsService {
     return `This action returns a #${id} accountant`;
   }
 
-  update(id: string, updateAccountantDto: UpdateAccountantDto) {
-    return `This action updates a #${id} accountant`;
+  async update(id: string, updateAccountantDto: UpdateAccountantDto) {
+    const accountant = await this.accountantsRepository.findOne({
+      where: {
+        id
+      },
+    })
+    if (!accountant) throw new NotFoundException([`Không tìm thấy chủ hộ mã số ${id}!`])
+    const { name, email, phone } = updateAccountantDto
+    if (email !== accountant.email) {
+      const existingEmail = await this.accountantsRepository.findOne({ where: { email } })
+      if (existingEmail) throw new BadRequestException([`Email ${email} đã tồn tại, vui lòng kiểm tra lại!`])
+    }
+    const update = await this.accountantsRepository.update(id, {
+      name, email, phone
+    })
+    return { message: "Cập nhật thành công" }
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} accountant`;
+  async reactive(id: string) {
+    const update = await this.accountantsRepository.update(id, {
+      active: true
+    })
+    if (update.affected === 0) throw new BadRequestException(["Không thể ngừng hoạt động quản lý viên với mã số này!"])
+    return ({ message: "Khôi phục thành công" })
+  }
+
+  async deactive(id: string) {
+    const update = await this.accountantsRepository.update(id, {
+      active: false
+    })
+    if (update.affected === 0) throw new BadRequestException(["Không thể ngừng hoạt động quản lý viên với mã số này!"])
+    return ({ message: "Ngừng hoạt động thành công" })
+  }
+
+  async remove(id: string) {
+    const del = await this.accountantsRepository.delete(id)
+    if (del.affected === 0) throw new BadRequestException(["Không thể xóa thông tin!"])
+    return ({ message: "Xóa thông tin thành công" })
   }
 }

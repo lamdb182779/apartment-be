@@ -163,6 +163,7 @@ export class ResidentsService {
     await this.residentsRepository.save(resident)
     return { message: "Cập nhật thành công" }
   }
+
   async reactive(id: string) {
     const update = await this.residentsRepository.update(id, {
       active: true
